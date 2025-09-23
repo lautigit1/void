@@ -1,13 +1,17 @@
 # En backend/routers/products_router.py
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Optional
 
 from schemas import product_schemas
 from database.database import get_db
-from database.models import Producto
+from database.models import Producto 
+
+from services import auth_services
+from schemas import user_schemas
+
 
 router = APIRouter(
     prefix="/api/products",
@@ -75,3 +79,101 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Producto no encontrado")
         
     return product
+
+@router.post(
+    "/", 
+    response_model=product_schemas.Product, 
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear un nuevo producto (Solo Admins)"
+)
+async def create_product(
+    product_in: product_schemas.ProductCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user) 
+):
+    """
+    Crea un nuevo producto en la base de datos.
+    Requiere autenticación de administrador.
+    """
+    existing_product_sku = await db.execute(
+        select(Producto).filter(Producto.sku == product_in.sku)
+    )
+    if existing_product_sku.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ya existe un producto con el SKU: {product_in.sku}"
+        )
+
+    new_product = Producto(**product_in.model_dump())
+    
+    db.add(new_product)
+    await db.commit()
+    await db.refresh(new_product)
+    
+    return new_product
+
+@router.put(
+    "/{product_id}",
+    response_model=product_schemas.Product,
+    summary="Actualizar un producto (Solo Admins)"
+)
+async def update_product(
+    product_id: int,
+    product_in: product_schemas.ProductUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user)
+):
+    """
+    Actualiza un producto existente en la base de datos por su ID.
+    Solo los campos presentes en el JSON de entrada (product_in) serán actualizados.
+    Requiere autenticación de administrador.
+    """
+    product_db = await db.get(Producto, product_id)
+    
+    if not product_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Producto no encontrado"
+        )
+        
+    update_data = product_in.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(product_db, key, value)
+        
+    db.add(product_db)
+    await db.commit()
+    await db.refresh(product_db)
+    
+    return product_db
+
+# --- NUEVO ENDPOINT DELETE ---
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar un producto (Solo Admins)"
+)
+async def delete_product(
+    product_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user)
+):
+    """
+    Elimina un producto de la base de datos por su ID.
+    Requiere autenticación de administrador.
+    """
+    # 1. Buscar el producto por ID
+    product_db = await db.get(Producto, product_id)
+    
+    if not product_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Producto no encontrado"
+        )
+        
+    # 2. Eliminar el producto
+    await db.delete(product_db)
+    await db.commit()
+    
+    # 3. Devolver mensaje de éxito (como espera el test)
+    return {"message": "Product deleted successfully"}

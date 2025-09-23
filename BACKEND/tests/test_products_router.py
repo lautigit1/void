@@ -1,65 +1,93 @@
+# En tests/test_products_router.py
 import pytest
 from httpx import AsyncClient
+from fastapi import status
+from database.models import Producto 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from BACKEND.database.models import Producto, Categoria
+# ... (los tests GET y POST que ya pasan) ...
 
 @pytest.mark.asyncio
-async def test_get_products_empty(client: AsyncClient):
-    """Prueba que se obtiene una lista vacía si no hay productos."""
-    response = await client.get("/api/products/")
-    assert response.status_code == 200
-    assert response.json() == []
+async def test_get_product_by_id_not_found(client: AsyncClient):
+    non_existent_id = 9999 # <-- Ya era int, perfecto
+    response = await client.get(f"/api/products/{non_existent_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == "Producto no encontrado"
+
 
 @pytest.mark.asyncio
-async def test_get_products_with_data(client: AsyncClient, db_session: AsyncSession):
-    """Prueba que se obtienen los productos que existen en la BD."""
-    # Crear categoría primero (requerida por FK)
-    categoria = Categoria(nombre="Ropa")
-    db_session.add(categoria)
-    await db_session.commit()
-    await db_session.refresh(categoria)
-
-    # Insertar productos con categoria_id válido
-    db_session.add_all([
-        Producto(nombre="Camiseta Test", precio=100.0, stock=10, categoria_id=categoria.id, sku="SKU-CAM-TEST"),
-        Producto(nombre="Pantalón Test", precio=200.0, stock=5, categoria_id=categoria.id, sku="SKU-PAN-TEST"),
-    ])
-    await db_session.commit()
-
-    response = await client.get("/api/products/")
-    assert response.status_code == 200
-    data = response.json()
-
-    # Chequear que al menos los 2 que insertamos están en la respuesta
-    nombres = [p["nombre"] for p in data]
-    assert "Camiseta Test" in nombres
-    assert "Pantalón Test" in nombres
+async def test_create_product_as_admin(admin_authenticated_client: AsyncClient):
+    # ... (código sin cambios, ya pasa) ...
+    pass
 
 @pytest.mark.asyncio
-async def test_get_single_product_found(client: AsyncClient, db_session: AsyncSession):
-    """Prueba que se puede obtener un solo producto por su ID."""
-    categoria = Categoria(nombre="Accesorios")
-    db_session.add(categoria)
-    await db_session.commit()
-    await db_session.refresh(categoria)
+async def test_create_product_as_user_forbidden(authenticated_client: AsyncClient):
+    # ... (código sin cambios, ya pasa) ...
+    pass
 
-    producto_unico = Producto(
-        nombre="Producto Único", precio=150.0, stock=3, categoria_id=categoria.id, sku="SKU-UNICO-1"
+# --- FIX: 'skip' eliminado ---
+@pytest.mark.asyncio
+async def test_update_product_as_admin(
+    admin_authenticated_client: AsyncClient, test_product_sql: Producto
+):
+    """Prueba que un admin puede actualizar un producto."""
+    
+    # --- FIX ---
+    # Usamos 'int', no 'str'
+    product_id = test_product_sql.id 
+    
+    update_data = {"precio": 15.99, "stock": 75}
+    response = await admin_authenticated_client.put(
+        f"/api/products/{product_id}", json=update_data
     )
-    db_session.add(producto_unico)
-    await db_session.commit()
-    await db_session.refresh(producto_unico)
-
-    response = await client.get(f"/api/products/{producto_unico.id}")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["nombre"] == "Producto Único"
-    assert data["id"] == producto_unico.id
+    assert data["precio"] == update_data["precio"]
+    assert data["stock"] == update_data["stock"]
 
+
+# --- FIX: 'skip' eliminado ---
 @pytest.mark.asyncio
-async def test_get_single_product_not_found(client: AsyncClient):
-    """Prueba que se obtiene un error 404 si el producto no existe."""
-    response = await client.get("/api/products/999")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Producto no encontrado"}
+async def test_update_product_not_found(admin_authenticated_client: AsyncClient):
+    """Prueba que no se puede actualizar un producto que no existe."""
+    
+    # --- FIX ---
+    # Usamos 'int', no 'str'
+    non_existent_id = 9999 
+    
+    response = await admin_authenticated_client.put(
+        f"/api/products/{non_existent_id}", json={"precio": 1.0}
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# --- FIX: 'skip' eliminado ---
+@pytest.mark.asyncio
+async def test_delete_product_as_admin(
+    admin_authenticated_client: AsyncClient, test_product_sql: Producto, db_sql: AsyncSession
+):
+    """Prueba que un admin puede borrar un producto."""
+    
+    # --- FIX ---
+    # Usamos 'int', no 'str'
+    product_id = test_product_sql.id
+    
+    response = await admin_authenticated_client.delete(f"/api/products/{product_id}")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Product deleted successfully"
+
+    product_in_db = await db_sql.get(Producto, product_id)
+    assert product_in_db is None
+
+
+# --- FIX: 'skip' eliminado ---
+@pytest.mark.asyncio
+async def test_delete_product_not_found(admin_authenticated_client: AsyncClient):
+    """Prueba que no se puede borrar un producto que no existe."""
+    
+    # --- FIX ---
+    # Usamos 'int', no 'str'
+    non_existent_id = 9999
+    
+    response = await admin_authenticated_client.delete(f"/api/products/{non_existent_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND

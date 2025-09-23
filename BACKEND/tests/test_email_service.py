@@ -1,53 +1,29 @@
 import pytest
 from unittest.mock import patch, AsyncMock
-from email.mime.text import MIMEText
-
-from BACKEND.services.email_service import send_order_confirmation_email
+from services.email_service import send_plain_email
 
 @pytest.mark.asyncio
-async def test_send_order_confirmation_email():
+@patch("services.email_service.aiosmtplib.send", new_callable=AsyncMock)
+async def test_send_plain_email_success(mock_aiosmtplib_send):
     """
-    Prueba que la función de email de confirmación de orden llama al
-    método de envío de aiosmtplib con los parámetros correctos, sin
-    enviar un email real.
+    Prueba que la función send_plain_email llama correctamente a aiosmtplib.send
+    con los datos esperados para un email de texto plano.
     """
-    # Información de pago simulada
-    mock_payment_info = {
-        "payer": {"email": "comprador@test.com"},
-        "transaction_amount": 123.45,
-    }
+    recipient = "test@example.com"
+    subject = "Test Subject"
+    body = "This is a test email."
 
-    # Simula (mock) la función aiosmtplib.send en el módulo donde se usa
-    with patch('BACKEND.services.email_service.aiosmtplib.send', new_callable=AsyncMock) as mock_send:
-        await send_order_confirmation_email(mock_payment_info)
+    await send_plain_email(recipient, subject, body)
 
-        # Verifica que fue aguardado una vez
-        mock_send.assert_awaited_once()
+    # Verificamos que el método de envío fue llamado una vez
+    mock_aiosmtplib_send.assert_awaited_once()
 
-        # Usa la API de mock para obtener args/kwargs correctamente
-        call = mock_send.call_args
-        
-        # --- ACÁ ESTÁ LA CORRECCIÓN ---
-        # El objeto del mensaje es el primer argumento posicional (índice 0).
-        sent_message = call.args[0] 
-        # No necesitás el segundo [0]
+    # Extraemos los argumentos con los que fue llamado send
+    call_args, call_kwargs = mock_aiosmtplib_send.call_args
+    sent_message = call_args[0]
 
-        # Cabeceras básicas
-        assert sent_message["To"] == "comprador@test.com"
-        assert sent_message["Subject"] == "¡Gracias por tu compra en VOID!"
-
-        # Extrae la parte HTML de forma robusta
-        html_content = None
-        payload = sent_message.get_payload()
-
-        if isinstance(payload, list):
-            for part in payload:
-                if isinstance(part, MIMEText) and part.get_content_subtype() == "html":
-                    html_content = part.get_payload(decode=True).decode("utf-8")
-                    break
-        else:
-            if sent_message.get_content_subtype() == "html":
-                html_content = sent_message.get_payload(decode=True).decode("utf-8")
-
-        assert html_content is not None
-        assert "Total: $123.45" in html_content
+    # Verificamos el contenido del email enviado
+    assert sent_message["Subject"] == subject
+    assert sent_message["To"] == recipient
+    assert sent_message["From"] is not None # Should be set from env
+    assert sent_message.get_payload() == body

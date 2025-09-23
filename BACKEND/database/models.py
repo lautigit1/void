@@ -58,6 +58,7 @@ class Orden(Base):
     estado_pago = Column(String(50), nullable=True)
     creado_en = Column(TIMESTAMP, server_default=func.now())
     detalles = relationship("DetalleOrden", back_populates="orden")
+    payment_id_mercadopago = Column(String(255), unique=True, nullable=True, index=True)
 
 
 class DetalleOrden(Base):

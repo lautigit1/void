@@ -38,7 +38,11 @@ async def register_user(user: user_schemas.UserCreate, db: Database = Depends(ge
     result = await db.users.insert_one(user_document)
     created_user = await db.users.find_one({"_id": result.inserted_id})
     
-    return user_schemas.UserOut(**created_user)
+    # --- FIX ---
+    # Devolvemos el dict 'created_user'.
+    # FastAPI usará el 'response_model=user_schemas.UserOut' 
+    # para validarlo y serializarlo (convirtiendo _id a id).
+    return created_user
 
 @router.post("/login", response_model=user_schemas.Token)
 async def login_for_access_token(db: Database = Depends(get_db_nosql), form_data: OAuth2PasswordRequestForm = Depends()):
@@ -51,11 +55,10 @@ async def login_for_access_token(db: Database = Depends(get_db_nosql), form_data
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # <-- CAMBIO: Incluimos el rol en los datos del token
     token_data = {
         "sub": user["email"], 
         "user_id": str(user["_id"]),
-        "role": user.get("role", "user") # Usamos .get por si un usuario viejo no tiene rol
+        "role": user.get("role", "user")
     }
     
     access_token = security.create_access_token(data=token_data)
@@ -78,7 +81,7 @@ async def promote_to_admin(
 ):
     user_to_promote = await db.users.find_one({"email": user_email})
     if not user_to_promote:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado.")
+        raise HTTPException(status_code=status.HTTP_44_NOT_FOUND, detail="Usuario no encontrado.")
 
     await db.users.update_one(
         {"email": user_email},

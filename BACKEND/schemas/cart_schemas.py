@@ -1,15 +1,17 @@
 # En backend/schemas/cart_schemas.py
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, BeforeValidator, ConfigDict # <-- 1. Importar
 from typing import List, Optional
 from datetime import datetime
+from typing_extensions import Annotated # <-- 2. Importar
+
+# --- 3. Añadir el helper PyObjectId ---
+# Le dice a Pydantic: "antes de validar, intenta convertir el valor a string"
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 # Molde para un item individual dentro del carrito
 class CartItem(BaseModel):
-    # --- CAMBIO CLAVE ---
-    # Cambiamos product_id por variante_id para identificar el item específico
     variante_id: int
-    
     quantity: int = Field(..., gt=0)
     price: float
     name: str
@@ -17,17 +19,17 @@ class CartItem(BaseModel):
 
 # Molde para el objeto principal del carrito
 class Cart(BaseModel):
-    # El alias _id es para MongoDB, pero el carrito lo vamos a manejar en el front
-    # o en una DB temporal como Redis. Por ahora lo dejamos así.
-    id: Optional[str] = Field(None, alias="_id")
+    
+    # --- 4. FIX: Usar PyObjectId para el id ---
+    id: Optional[PyObjectId] = Field(None, alias="_id")
+    
     user_id: Optional[str] = None
     guest_session_id: Optional[str] = None
     items: List[CartItem] = []
     last_updated: datetime = Field(default_factory=datetime.now)
 
-    # La configuración model_config está bien, pero from_attributes es más para SQLAlchemy
-    # La dejamos porque no hace daño.
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True
-    }
+    # --- 5. FIX: Actualizar a ConfigDict (para Pydantic v2) ---
+    model_config = ConfigDict(
+        populate_by_name = True,
+        arbitrary_types_allowed = True
+    )
