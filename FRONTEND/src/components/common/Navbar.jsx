@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Navbar = ({ isMenuOpen, onToggleMenu }) => {
+const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu }, ref) => {
   return (
     <header className="main-header">
       <nav className="main-nav">
@@ -18,7 +18,8 @@ const Navbar = ({ isMenuOpen, onToggleMenu }) => {
           </button>
         </div>
         <div className="nav-center">
-          <Link to="/" className="logo">VOID</Link>
+          {/* VOLVEMOS A PONER EL LOGO AQUÍ Y LE ASIGNAMOS LA REFERENCIA */}
+          <Link to="/" className="logo" ref={ref}>VOID</Link>
         </div>
         <div className="nav-right">
           <div className="search-container">
@@ -32,6 +33,6 @@ const Navbar = ({ isMenuOpen, onToggleMenu }) => {
       </nav>
     </header>
   );
-};
+});
 
 export default Navbar;

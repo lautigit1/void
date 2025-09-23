@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 
-const DropdownMenu = ({ isOpen, onClose }) => {
+const DropdownMenu = ({ isOpen, onClose, logoPosition }) => {
   const [activeCategory, setActiveCategory] = useState('menswear');
 
   const handleCategoryClick = (e, category) => {
     e.preventDefault();
     setActiveCategory(category);
+  };
+  
+  const logoStyle = {
+    position: 'fixed', // <-- LA CORRECCIÓN. DEBE SER 'fixed' Y NO 'absolute'.
+    top: `${logoPosition.top}px`,
+    left: `${logoPosition.left}px`,
+    width: `${logoPosition.width}px`,
+    height: `${logoPosition.height}px`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: isOpen ? 1 : 0,
+    transition: 'opacity 0.2s ease-in-out',
   };
 
   return (
@@ -26,9 +39,10 @@ const DropdownMenu = ({ isOpen, onClose }) => {
             <span></span>
             <span></span>
           </button>
-          <div className="dropdown-logo">VOID</div>
+          
+          <div className="dropdown-logo" style={logoStyle}>VOID</div>
         </div>
-
+        
         <div className="dropdown-content">
           <div className="menu-categories">
             <nav className="dropdown-nav-left">

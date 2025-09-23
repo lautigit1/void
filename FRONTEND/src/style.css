@@ -37,11 +37,11 @@ body.menu-open {
     height: 100%;
     background-color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(4px);
-    z-index: 999;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.6s ease, visibility 0.6s ease;
     cursor: pointer;
+    z-index: 2001;
 }
 
 .overlay.active {
@@ -66,11 +66,11 @@ a {
 .main-header {
     background-color: var(--header-bg);
     color: var(--text-color-inverse);
-    padding: 1.5rem 2rem; /* <-- AUMENTADO PARA HACERLO MÁS ALTO */
+    padding: 1.5rem 2rem;
     position: relative;
-    z-index: 1001;
     display: flex;
     align-items: center;
+    z-index: 1001;
 }
 
 .main-nav {
@@ -192,13 +192,13 @@ a {
     width: 50vw;
     height: 100vh;
     background-color: var(--primary-bg);
-    z-index: 2002;
     display: flex;
     flex-direction: column;
     opacity: 0;
     visibility: hidden; 
     transform: scale(0.98);
     transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+    z-index: 2002;
 }
 
 .dropdown-menu.open {
@@ -211,8 +211,18 @@ a {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: 1.5rem 2rem; /* <-- AUMENTADO PARA COINCIDIR CON EL HEADER */
+    padding: 1.5rem 2rem;
     position: relative;
+}
+
+.dropdown-logo {
+    font-family: var(--font-logo);
+    font-size: 60px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text-color);
+    line-height: 1;
+    pointer-events: none;
 }
 
 /* --- ANIMACIÓN DE LA X CORREGIDA --- */
@@ -228,7 +238,7 @@ a {
     justify-content: center;
     align-items: center;
     margin-left: 1rem;
-    z-index: 10;
+    z-index: 2;
 }
 
 .close-btn span {
@@ -264,24 +274,6 @@ a {
     bottom: 50%;
     transform: translateY(50%) rotate(-45deg);
 }
-
-
-/* --- ALINEACIÓN DE LOGO CORREGIDA Y FINAL --- */
-.dropdown-logo {
-    font-family: var(--font-logo);
-    font-size: 60px;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    color: var(--text-color);
-    margin: 0;
-    line-height: 1; 
-    
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(calc(-50% - 2rem), -50%);
-}
-
 
 .dropdown-content {
     display: flex;
