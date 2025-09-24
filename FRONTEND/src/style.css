@@ -1274,3 +1274,78 @@ main {
       font-size: 1rem;
     }
 }
+/* --- Estilos para la Página del Panel de Admin --- */
+.admin-panel-container {
+  font-family: var(--font-nav);
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.admin-panel-title {
+  font-weight: 500;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 4rem;
+  color: #333;
+}
+
+.admin-forms-container {
+  display: flex;
+  justify-content: center;
+  gap: 8rem;
+  flex-wrap: wrap; /* Para que se vea bien en pantallas más chicas */
+}
+
+.admin-form {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.admin-form-title {
+  font-weight: 500;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+/* Reutilizamos los estilos de los inputs del login */
+.admin-form .input-group {
+  margin-bottom: 2.5rem;
+}
+.admin-form .input-group label {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: #888;
+}
+.admin-form .input-group input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #000;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  background-color: transparent;
+}
+
+/* Reutilizamos el estilo del botón outline */
+.admin-form .form-button.outline {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+  margin-top: 1rem;
+}
+.admin-form .form-button.outline:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-message {
+  margin-top: 2rem;
+  color: #333;
+  width: 100%;
+  text-align: center;
+  min-height: 20px; /* Para que no salte la página cuando aparece */
+}

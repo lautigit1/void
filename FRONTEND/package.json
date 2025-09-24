@@ -14,11 +14,13 @@
     "axios": "^1.12.2",
     "framer-motion": "^12.23.19",
     "gsap": "^3.13.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.544.0",
     "rc-slider": "^11.1.9",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.1"
+    "react-router-dom": "^7.9.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

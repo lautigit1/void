@@ -1,35 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useQuery } from '@tanstack/react-query'; // <-- La mejora
+import axios from 'axios'; // <-- Se queda aquí, seguro
 import FilterPanel from '../components/common/FilterPanel.jsx';
+
+// La función de fetching se queda dentro del mismo archivo
+const fetchProducts = async (categoryName) => {
+  const { data } = await axios.get('http://localhost:8000/api/products?limit=12');
+  return data;
+};
+
+// Componente placeholder para la grilla (para una carga más elegante)
+const ProductCardSkeleton = () => (
+  <div className="catalog-product-card">
+    <div className="catalog-product-image-container bg-gray-200 animate-pulse" />
+    <div className="catalog-product-info mt-2">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse" />
+      <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+    </div>
+  </div>
+);
 
 const CatalogPage = () => {
   const { categoryName } = useParams();
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get('http://localhost:8000/api/products?limit=12');
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error al cargar los productos del catálogo:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // La magia de React Query, reemplaza el useEffect y los useState de carga
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ['products', categoryName],
+    queryFn: () => fetchProducts(categoryName),
+  });
 
-    fetchProducts();
-    window.scrollTo(0, 0); 
-  }, [categoryName]);
-  
-  // Bloquea el scroll del body cuando el panel está abierto
+  // El resto del código no cambia...
   useEffect(() => {
     document.body.style.overflow = isFilterPanelOpen ? 'hidden' : 'auto';
   }, [isFilterPanelOpen]);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0); 
+  }, [categoryName]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-AR', {
@@ -52,30 +61,33 @@ const CatalogPage = () => {
           <button onClick={toggleFilterPanel} className="filters-link">FILTERS &gt;</button>
         </div>
 
-        {isLoading ? (
-          <p className="loading-text">Cargando productos...</p>
+        {error ? (
+          <p className="loading-text">Error al cargar los productos.</p>
         ) : (
           <div className="catalog-product-grid">
-            {products.map(product => (
-              <div className="catalog-product-card" key={product.id}>
-                <Link to={`/product/${product.id}`} className="catalog-product-link">
-                  <div className="catalog-product-image-container">
-                      <img 
-                          src={product.urls_imagenes || '/img/placeholder.jpg'} 
-                          alt={product.nombre} 
-                          className="catalog-product-image"
-                      />
+            {isLoading
+              ? Array.from({ length: 12 }).map((_, i) => <ProductCardSkeleton key={i} />)
+              // Si está cargando, muestra los placeholders
+              : products.map(product => (
+                  <div className="catalog-product-card" key={product.id}>
+                    <Link to={`/product/${product.id}`} className="catalog-product-link">
+                      <div className="catalog-product-image-container">
+                          <img 
+                              src={product.urls_imagenes || '/img/placeholder.jpg'} 
+                              alt={product.nombre} 
+                              className="catalog-product-image"
+                          />
+                      </div>
+                      <div className="catalog-product-info">
+                        <h3 className="catalog-product-name">{product.nombre}</h3>
+                        <p className="catalog-product-price">{formatPrice(product.precio)}</p>
+                      </div>
+                    </Link>
                   </div>
-                  <div className="catalog-product-info">
-                    <h3 className="catalog-product-name">{product.nombre}</h3>
-                    <p className="catalog-product-price">{formatPrice(product.precio)}</p>
-                  </div>
-                </Link>
-              </div>
-            ))}
+                ))}
           </div>
         )}
-
+        
         <nav className="pagination-controls">
           <a href="#" className="pagination-arrow">&lt; PREVIOUS</a>
           <a href="#" className="pagination-number active">1</a>
@@ -87,13 +99,11 @@ const CatalogPage = () => {
         </nav>
       </main>
       
-      {/* 1. AÑADIMOS EL OVERLAY */}
       <div 
         className={`filter-panel-overlay ${isFilterPanelOpen ? 'open' : ''}`}
         onClick={toggleFilterPanel} 
       ></div>
       
-      {/* 2. EL PANEL DE FILTROS SE RENDERIZA POR ENCIMA */}
       <FilterPanel isOpen={isFilterPanelOpen} onClose={toggleFilterPanel} />
     </>
   );

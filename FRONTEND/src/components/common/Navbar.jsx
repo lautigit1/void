@@ -26,7 +26,6 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu }, ref) => {
             <div className="search-underline"></div>
           </div>
           <a>LANGUAGE</a>
-          {/* AQUÍ ESTÁ EL CAMBIO */}
           <Link to="/login">LOGIN</Link>
           <a>BAG</a>
         </div>
