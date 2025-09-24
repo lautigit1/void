@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuthStore } from '../stores/useAuthStore'; // 1. Importar el store
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login); // 2. Obtenemos la acción de login del store
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     const formData = new URLSearchParams();
-    formData.append('username', email);
+    formData.append('username', email); // El backend espera 'username' para el email
     formData.append('password', password);
 
     try {
@@ -24,14 +26,20 @@ const LoginPage = () => {
       });
 
       const { access_token } = response.data;
-      localStorage.setItem('authToken', access_token);
+      
+      // 3. Usamos la acción del store para actualizar el estado global
+      login(access_token);
 
       console.log('Login exitoso!');
-      navigate('/'); 
+      navigate('/'); // Redirigimos al home
 
     } catch (err) {
       console.error('Error en el login:', err);
-      setError('Email o contraseña incorrectos. Por favor, intentá de nuevo.');
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError('Email o contraseña incorrectos. Por favor, intentá de nuevo.');
+      }
     }
   };
 
