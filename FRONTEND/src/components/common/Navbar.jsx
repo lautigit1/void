@@ -18,7 +18,6 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu }, ref) => {
           </button>
         </div>
         <div className="nav-center">
-          {/* VOLVEMOS A PONER EL LOGO AQUÍ Y LE ASIGNAMOS LA REFERENCIA */}
           <Link to="/" className="logo" ref={ref}>VOID</Link>
         </div>
         <div className="nav-right">
@@ -27,7 +26,8 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu }, ref) => {
             <div className="search-underline"></div>
           </div>
           <a>LANGUAGE</a>
-          <a>LOGIN</a>
+          {/* AQUÍ ESTÁ EL CAMBIO */}
+          <Link to="/login">LOGIN</Link>
           <a>BAG</a>
         </div>
       </nav>

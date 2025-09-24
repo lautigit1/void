@@ -72,6 +72,17 @@ a {
     cursor: pointer;
 }
 
+/* --- Layout Principal de la Página --- */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
+}
+
 /* --- Header y Navegación Principal --- */
 .main-header {
     background-color: var(--header-bg);
@@ -519,6 +530,558 @@ a {
     letter-spacing: 0.1em;
 }
 
+/* --- Estilos para la Página de Catálogo --- */
+
+.catalog-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.catalog-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 4rem;
+  padding: 1rem 0;
+}
+
+.catalog-title {
+  font-family: var(--font-nav);
+  font-weight: 400;
+  font-size: 1.5rem; /* 24px */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #333;
+  margin: 0;
+}
+
+/* --- CÓDIGO CORREGIDO PARA EL BOTÓN DE FILTROS --- */
+.filters-link {
+  /* 1. ESTILOS PARA LA POSICIÓN */
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* 2. ESTILOS PARA LA APARIENCIA */
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-nav);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+.filters-link:hover {
+  color: #000;
+}
+
+.loading-text {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #888;
+}
+
+.catalog-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem 1.5rem; /* Más espacio vertical que horizontal */
+  margin-bottom: 5rem;
+}
+
+.catalog-product-card {
+  text-align: left;
+}
+
+.catalog-product-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.catalog-product-image-container {
+  background-color: #f8f8f8;
+  margin-bottom: 1rem;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalog-product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.catalog-product-info {
+  padding: 0 0.25rem;
+}
+
+.catalog-product-name {
+  font-family: var(--font-nav);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0 0 0.25rem 0;
+  color: #222;
+}
+
+.catalog-product-price {
+  font-family: var(--font-nav);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  color: #555;
+  margin: 0;
+}
+
+/* --- Estilos de Paginación --- */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 6rem;
+  font-family: var(--font-nav);
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+.pagination-arrow {
+  color: #aaa;
+}
+
+.pagination-number {
+  color: #888;
+}
+
+.pagination-number.active {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* --- Estilos para el FilterPanel --- */
+.filter-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 2005;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-panel.open {
+  transform: translateX(0);
+}
+
+.filter-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 2004;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.filter-panel-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+.filter-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
+.filter-panel-title {
+  font-family: var(--font-nav);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: #333;
+  margin: 0;
+}
+
+.filter-panel-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #333;
+}
+
+.filter-panel-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem 2rem 2rem;
+}
+
+.filter-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-section:last-of-type {
+  border-bottom: none;
+}
+
+.filter-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.filter-section-title {
+  font-family: var(--font-nav);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: #333;
+}
+
+.filter-section-arrow {
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.filter-section-body {
+  padding-top: 1rem;
+  display: none;
+}
+
+.filter-section.active .filter-section-body {
+  display: block;
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 1.8rem;
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+  font-family: var(--font-nav);
+  font-size: 0.85rem;
+  color: #555;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1rem;
+  width: 1rem;
+  background-color: #fff;
+  border: 1px solid #bbb;
+  box-sizing: border-box;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #f0f0f0;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #000;
+  border-color: #000;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 0.35rem;
+  top: 0.15rem;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.price-filter-body {
+  padding-bottom: 2rem;
+}
+
+.price-display {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-nav);
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.price-separator {
+  margin: 0 0.5rem;
+  color: #777;
+}
+
+.rc-slider {
+  margin: 0.5rem 0;
+}
+
+/* --- Estilos para la Página de Login --- */
+.login-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  font-family: var(--font-nav);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.login-form-section,
+.signup-section {
+  width: 100%;
+}
+
+.signup-section {
+  margin-top: 5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.form-title {
+  font-weight: 500;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 2.5rem;
+  color: #333;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+
+.input-group label {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: #888;
+}
+
+.input-group input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #000;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  background-color: transparent;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-bottom-color: #555;
+}
+
+.forgot-password-link {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #888;
+  text-decoration: none;
+  margin-top: -1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.error-message {
+  color: #d9534f;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.form-button {
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+}
+
+.form-button:hover {
+  background-color: #333;
+}
+
+.form-subtitle {
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.signup-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Estilos para la Página de Registro --- */
+.register-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  font-family: var(--font-nav);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.phone-input-group {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.phone-input-group .input-group {
+  margin-bottom: 0;
+}
+
+.phone-input-group .prefix {
+  flex-basis: 25%;
+}
+
+.phone-input-group .phone-number {
+  flex-basis: 75%;
+}
+
+.checkbox-group {
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+
+.checkbox-container-register {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #888;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.checkbox-container-register input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark-register {
+  position: relative;
+  height: 1rem;
+  width: 1rem;
+  background-color: transparent;
+  border: 1px solid #000;
+  margin-right: 0.8rem;
+}
+
+.checkbox-container-register input:checked ~ .checkmark-register {
+  background-color: #000;
+}
+
+.privacy-link {
+  color: #888;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+.form-button.outline {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.form-button.outline:hover {
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+.success-message {
+  color: #28a745;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+
 /* --- Diseño Responsivo --- */
 @media (max-width: 1200px) {
     .hero-image-left {
@@ -532,6 +1095,10 @@ a {
     .product-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
+    }
+    
+    .catalog-product-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -589,6 +1156,25 @@ a {
     .product-grid {
         gap: 1.5rem;
     }
+    
+    .filter-panel {
+      width: 100%;
+    }
+    
+    .catalog-container {
+      padding: 2rem 1rem;
+    }
+    .catalog-product-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .catalog-title {
+      font-size: 1.25rem;
+    }
+    .pagination-controls {
+      gap: 1rem;
+      font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 600px) {
@@ -633,6 +1219,11 @@ a {
         height: auto;
         max-height: 350px;
     }
+    
+    .catalog-product-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
 
     .footer-links {
         flex-direction: column;
@@ -661,5 +1252,25 @@ a {
     }
     .title-line {
         height: 80px;
+    }
+    
+    .login-page-container,
+    .register-page-container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .phone-input-group {
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .phone-input-group .prefix,
+    .phone-input-group .phone-number {
+      flex-basis: auto;
+    }
+    
+    .form-title {
+      font-size: 1rem;
     }
 }

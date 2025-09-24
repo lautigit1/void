@@ -5,6 +5,9 @@ import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
 import DropdownMenu from './components/common/DropdownMenu.jsx';
 import HomePage from './pages/HomePage.jsx';
+import CatalogPage from './pages/CatalogPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,6 +40,9 @@ function App() {
         
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/catalog/:categoryName" element={<CatalogPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<RegisterPage />} />
         </Routes>
         
         <Footer />
