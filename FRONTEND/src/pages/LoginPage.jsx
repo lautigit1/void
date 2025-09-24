@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuthStore } from '../stores/useAuthStore'; // 1. Importar el store
+import { useAuthStore } from '../stores/useAuthStore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login); // 2. Obtenemos la acción de login del store
+  const login = useAuthStore((state) => state.login);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,8 +27,8 @@ const LoginPage = () => {
 
       const { access_token } = response.data;
       
-      // 3. Usamos la acción del store para actualizar el estado global
-      login(access_token);
+      // FIX: Ahora solo pasamos el token a la función de login del store
+      await login(access_token);
 
       console.log('Login exitoso!');
       navigate('/'); // Redirigimos al home

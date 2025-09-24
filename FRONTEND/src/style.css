@@ -1349,3 +1349,708 @@ main {
   text-align: center;
   min-height: 20px; /* Para que no salte la página cuando aparece */
 }
+/* --- Estilos para la Página del Panel de Admin --- */
+
+.admin-layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    font-family: var(--font-nav);
+    padding: 4rem;
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding: 0 2rem;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0;
+    font-family: var(--font-nav);
+}
+
+.admin-forms-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 6rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.admin-form-card {
+    background-color: var(--primary-bg);
+    border: none;
+    padding: 0;
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: none;
+}
+
+.admin-form-card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.15em;
+    color: var(--text-color);
+    font-family: var(--font-nav);
+}
+
+.admin-form-group {
+    margin-bottom: 1.8rem;
+}
+
+.admin-form-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-nav);
+}
+
+.admin-form-group input {
+    width: 100%;
+    padding: 0.5rem 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--text-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+    transition: border-bottom-color 0.3s ease;
+    font-family: var(--font-nav);
+}
+
+.admin-form-group input:focus {
+    border-bottom-color: #555;
+}
+
+.admin-upload-button {
+    background: none;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    padding: 0.8rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    margin-top: 3rem;
+    align-self: center;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    text-transform: uppercase;
+    font-family: var(--font-nav);
+}
+
+.admin-upload-button:hover {
+    background-color: var(--text-color);
+    color: var(--primary-bg);
+}
+/* --- Estilos para la Página de Producto --- */
+
+.product-details-container {
+    display: flex;
+    max-width: 1500px;
+    margin: 4rem auto;
+    gap: 4rem;
+}
+
+.product-images {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.product-images img {
+    width: 100%;
+    object-fit: contain;
+}
+
+.product-info-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2rem;
+}
+
+.product-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.1em;
+}
+
+.product-price {
+    font-size: 1.25rem;
+    color: #555;
+    margin: 0 0 2rem 0;
+}
+
+.product-sizes {
+    margin-bottom: 2rem;
+}
+
+.size-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+}
+
+.size-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.size-button {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.size-button:hover {
+    background-color: #f0f0f0;
+}
+
+.size-button.active {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.product-description {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.add-to-cart-button {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-to-cart-button:hover {
+    background-color: #333;
+}
+
+/* --- Estilos para la Vista del Carrito (Page) --- */
+
+.cart-page-container {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.cart-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 4rem;
+}
+
+.cart-item-list {
+    border-top: 1px solid #ddd;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-item-image {
+    width: 100px;
+    height: 120px;
+    object-fit: cover;
+    margin-right: 1.5rem;
+}
+
+.cart-item-details {
+    flex-grow: 1;
+}
+
+.cart-item-details h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.cart-item-details p {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}
+
+.cart-item-price {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.cart-summary {
+    margin-top: 2rem;
+    border-top: 1px solid #000;
+    padding-top: 2rem;
+    text-align: right;
+}
+
+.cart-summary p {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.cart-summary p.total {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.checkout-button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+/* --- Estilos para el Modal de Quick View --- */
+
+.product-modal-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+}
+
+/* Puedes envolver el ProductDetails en un div con estos estilos para el modal */
+.quick-view-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+/* Estilos para el Modal de Quick View */
+
+.quick-view-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000; /* Aseguramos que esté por encima de todo */
+}
+
+.quick-view-modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    position: relative;
+    max-width: 90%;
+    width: 1000px; /* Ancho fijo para el modal */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.product-modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+}
+/* --- Estilos para la Página de Producto Completa --- */
+
+.product-details-container-full {
+    display: flex;
+    max-width: 1500px;
+    margin: 4rem auto;
+    gap: 4rem;
+}
+
+.product-images-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.product-images-column img {
+    width: 100%;
+    object-fit: contain;
+}
+
+.product-info-panel-full {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2rem;
+}
+
+.product-style-info {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0 0 2rem 0;
+}
+
+.product-size-selector {
+    margin-bottom: 2rem;
+}
+
+.product-size-selector p {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    letter-spacing: 0.1em;
+}
+
+.product-description-full {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.add-to-cart-button {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.add-to-cart-button:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+
+/* --- Estilos para el Modal de Notificación del Carrito --- */
+
+.cart-notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4000; /* Alto z-index para que se muestre por encima de todo */
+}
+
+.cart-notification-modal {
+    background-color: #fff;
+    width: 600px;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.cart-notification-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+}
+
+.cart-notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cart-notification-header h3 {
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.cart-notification-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.cart-notification-image {
+    width: 100px;
+    height: 120px;
+    background-color: #f8f8f8;
+}
+
+.cart-notification-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cart-notification-details {
+    flex-grow: 1;
+}
+
+.cart-notification-details p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.cart-notification-details p:first-child {
+    font-weight: 600;
+}
+
+.cart-notification-price {
+    font-weight: 600;
+}
+
+.cart-notification-summary {
+    border-top: 1px solid #ddd;
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.total-line {
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+.summary-info {
+    color: #888;
+}
+
+.cart-notification-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.action-button {
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border: 1px solid #000;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    flex-grow: 1;
+}
+
+.primary-button {
+    background-color: #000;
+    color: #fff;
+}
+
+.secondary-button {
+    background: none;
+    color: #000;
+}
+
+@media (max-width: 768px) {
+    .cart-notification-modal {
+        width: 90%;
+    }
+}
+/* --- Estilos para la Página del Carrito Completa (SHOPPING BAG) --- */
+
+.cart-page-container {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+    font-family: var(--font-nav);
+}
+
+.cart-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 4rem;
+    text-transform: uppercase;
+}
+
+.cart-list-wrapper {
+    border-top: 1px solid #000;
+}
+
+.cart-item-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    font-weight: 600;
+    border-bottom: 1px solid #000;
+}
+
+.cart-header-label:first-child {
+    flex-grow: 1;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-item-details {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-grow: 1;
+}
+
+.cart-item-image {
+    width: 100px;
+    height: 120px;
+    background-color: #f8f8f8;
+}
+
+.cart-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cart-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-item-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.cart-item-info p {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}
+
+.cart-item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.cart-item-price {
+    font-weight: 600;
+}
+
+.remove-item-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.cart-summary-section {
+    margin-top: 2rem;
+    text-align: right;
+    max-width: 400px;
+    margin-left: auto;
+}
+
+.cart-summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.cart-summary-line .summary-label {
+    font-weight: 600;
+}
+
+.cart-summary-line .summary-value {
+    color: #000;
+}
+
+.cart-summary-line.total-line {
+    font-weight: 700;
+    font-size: 1.2rem;
+    border-top: 1px solid #000;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.checkout-button {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+}
+
+.checkout-button:hover {
+    background-color: #000;
+    color: #fff;
+}
