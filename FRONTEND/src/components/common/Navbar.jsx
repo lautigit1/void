@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 
-// FIX: La prop onOpenCart debe estar en la desestructuración
-const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenCart }, ref) => {
+// FIX: La prop onOpenCart ya no es necesaria
+const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu }, ref) => {
     const { isAuthenticated, user, logout } = useAuthStore();
 
     const handleLogout = () => {
@@ -45,8 +45,8 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenCart }, ref) 
               <Link to="/login">LOGIN</Link>
             )}
 
-            {/* FIX: El onClick debe llamar a la función que nos llega por prop */}
-            <a onClick={onOpenCart}>BAG</a>
+            {/* FIX: CAMBIADO a un componente <Link> para navegar a la página del carrito */}
+            <Link to="/cart">BAG</Link>
           </div>
         </nav>
       </header>

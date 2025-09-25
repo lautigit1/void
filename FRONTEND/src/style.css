@@ -2054,3 +2054,226 @@ main {
     background-color: #000;
     color: #fff;
 }
+/* Nuevo contenedor para la página del carrito */
+.cart-content-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Encabezado del listado */
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+/* Estilo para cada ítem del carrito */
+.cart-item-new-style {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 1rem;
+}
+
+.item-details-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.item-details-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Estilo para el precio y botón de remover del nuevo diseño */
+.cart-item-price-new {
+  font-weight: 600;
+}
+
+.remove-item-btn-new {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 0.5rem;
+}
+
+/* Contenedor del resumen y botón de checkout */
+.cart-summary-section-new {
+  width: 400px;
+  margin-left: auto;
+  margin-top: 2rem;
+  text-align: right;
+}
+
+/* Estilo para el botón de Checkout del nuevo diseño */
+.checkout-button-new {
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+}
+
+.checkout-button-new:hover {
+  background-color: #333;
+}
+/* Contenedor principal para el diseño de la imagen */
+.cart-content-wrapper-new {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+
+/* Encabezado del carrito con la línea divisoria */
+.cart-item-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Botón de cierre */
+.cart-close-btn-new {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+    padding: 0;
+}
+
+/* Contenedor de cada ítem del carrito */
+.cart-item-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Diseño de la izquierda del ítem (imagen y texto) */
+.item-details-left-new {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.cart-item-image-new {
+    width: 100px;
+    height: 120px;
+    background-color: #f8f8f8;
+}
+
+.cart-item-image-new img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cart-item-info-new h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.cart-item-info-new p {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}
+
+/* Diseño de la derecha del ítem (precio y remover) */
+.item-details-right-new {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 0.5rem;
+}
+
+.cart-item-price-new {
+    font-weight: 600;
+}
+
+.remove-item-btn-new {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-transform: uppercase;
+}
+
+/* Sección de resumen del carrito */
+.cart-summary-section-new {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.cart-summary-line-new {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.cart-summary-line-new .summary-label {
+    font-weight: 600;
+}
+
+.cart-summary-line-new.total-line {
+    font-weight: 700;
+    font-size: 1.2rem;
+    border-top: 1px solid #000;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+/* Botón de checkout */
+.checkout-button-new {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+}
+
+.checkout-button-new:hover {
+    background-color: #333;
+}

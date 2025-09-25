@@ -1,15 +1,19 @@
+// En FRONTEND/src/pages/ProductPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // Importamos useMutation y useQueryClient
 import axios from 'axios';
-// FIX: No importamos el modal aquí, porque el padre lo renderiza
+import { v4 as uuidv4 } from 'uuid';
 
-// Componente reutilizable para los detalles del producto
+const api = axios.create({
+  baseURL: 'http://localhost:8000/api',
+});
+
 const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
     const navigate = useNavigate();
     const [selectedSize, setSelectedSize] = useState('L');
-    
-    // Agregué una lógica de mock para talles y colores
+    const queryClient = useQueryClient();
+
     const availableSizes = ['S', 'M', 'L', 'XL'];
     const availableColors = ['Black', 'White', 'Gray'];
 
@@ -22,12 +26,39 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
         }).format(price).replace("ARS", "$").trim();
     };
 
-    const handleAddToCart = () => {
-        // Lógica para agregar al carrito (pendiente de implementar)
-        // FIX: Llamamos a la función que nos llega por prop
-        if (onAddToCartSuccess) {
+    // Usamos useMutation para enviar datos al backend
+    const { mutate: addToCart } = useMutation({
+        mutationFn: async (item) => {
+            const token = localStorage.getItem('authToken');
+            let guestId = localStorage.getItem('guestSessionId');
+            if (!guestId) {
+                guestId = uuidv4();
+                localStorage.setItem('guestSessionId', guestId);
+            }
+            
+            const headers = { 'X-Guest-Session-ID': guestId };
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
+            const response = await api.post('/cart/items', item, { headers });
+            return response.data;
+        },
+        onSuccess: (updatedCart) => {
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
             onAddToCartSuccess(product);
-        }
+        },
+    });
+
+    const handleAddToCart = () => {
+        const item = {
+            variante_id: product.id, // Suponemos que el ID del producto es el de la variante
+            quantity: 1,
+            price: product.precio,
+            name: product.nombre,
+            image_url: product.urls_imagenes
+        };
+        addToCart(item);
     };
 
     return (
@@ -73,7 +104,7 @@ const ProductPage = ({ onOpenCartModal, onSetAddedProduct }) => {
     const { data: product, isLoading, error } = useQuery({
       queryKey: ['product', productId],
       queryFn: async () => {
-        const { data } = await axios.get(`http://localhost:8000/api/products/${productId}`);
+        const { data } = await api.get(`/products/${productId}`);
         return data;
       },
       enabled: !!productId

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
 const fetchCart = async () => {
@@ -24,6 +24,7 @@ const fetchCart = async () => {
 };
 
 const CartModal = ({ isOpen, onClose }) => {
+    const queryClient = useQueryClient();
     const { data: cart, isLoading, error } = useQuery({
         queryKey: ['cart'],
         queryFn: fetchCart,
@@ -44,6 +45,25 @@ const CartModal = ({ isOpen, onClose }) => {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(price).replace("ARS", "$").trim();
+    };
+
+    const handleRemoveItem = async (variante_id) => {
+        const token = localStorage.getItem('authToken');
+        const guestId = localStorage.getItem('guestSessionId');
+        
+        const headers = {};
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        } else if (guestId) {
+            headers['X-Guest-Session-ID'] = guestId;
+        }
+
+        try {
+            await axios.delete(`http://localhost:8000/api/cart/items/${variante_id}`, { headers });
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+        } catch (error) {
+            console.error("Error removing item:", error);
+        }
     };
 
     return (
@@ -72,7 +92,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                 </div>
                                 <div className="cart-item-info">
                                     <span className="cart-item-price">{formatPrice(item.price * item.quantity)} ARS</span>
-                                    <button className="cart-item-remove-btn">REMOVE</button>
+                                    <button onClick={() => handleRemoveItem(item.variante_id)} className="cart-item-remove-btn">REMOVE</button>
                                 </div>
                             </div>
                         ))
