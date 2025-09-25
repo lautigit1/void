@@ -1541,90 +1541,171 @@ main {
 }
 /* --- Estilos para la Vista del Carrito (Page) --- */
 
+/* --- ESTILOS DEFINITIVOS PARA SHOPPING BAG (DISEÑO DE IMAGEN) --- */
+
 .cart-page-container {
-    max-width: 1400px !important; /* Aumentamos el valor y añadimos !important */
-    width: 100%; /* Le decimos que intente ocupar todo el espacio disponible */
+    max-width: 850px;
     margin: 4rem auto;
     padding: 0 2rem;
-    box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
     font-family: var(--font-nav);
 }
 
-.cart-title {
+.cart-page-title {
     text-align: center;
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 400;
     letter-spacing: 0.1em;
-    margin-bottom: 4rem;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
 }
 
-.cart-item-list {
-    border-top: 1px solid #ddd;
+.cart-content {
+    width: 100%;
 }
 
-.cart-item {
+.cart-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cart-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.cart-item-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 2rem 0;
     border-bottom: 1px solid #ddd;
 }
 
-.cart-item-image {
-    width: 100px;
-    height: 120px;
-    object-fit: cover;
-    margin-right: 1.5rem;
-}
-
-.cart-item-details {
+.item-info-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
     flex-grow: 1;
 }
 
-.cart-item-details h3 {
-    font-size: 1rem;
+.item-image {
+    width: 100px;
+    height: 120px;
+    background-color: #f8f8f8;
+    flex-shrink: 0;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.item-details {
+    padding-top: 0.5rem;
+}
+
+.item-details h3 {
+    font-size: 0.9rem;
     font-weight: 600;
     margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
 }
 
-.cart-item-details p {
+.item-details p {
     font-size: 0.9rem;
-    color: #888;
     margin: 0;
+    color: #555;
+    line-height: 1.6;
 }
 
-.cart-item-price {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.cart-summary {
-    margin-top: 2rem;
-    border-top: 1px solid #000;
-    padding-top: 2rem;
+.item-info-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     text-align: right;
+    font-size: 0.9rem;
+    padding-top: 0.5rem;
+    flex-shrink: 0;
+    width: 120px;
 }
 
-.cart-summary p {
-    font-size: 1.1rem;
-    margin: 0 0 0.5rem 0;
+.item-price {
+    margin-bottom: 1rem;
 }
 
-.cart-summary p.total {
+.item-remove-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    padding: 0;
+    text-transform: uppercase;
+    text-decoration: underline;
+}
+
+/* --- SECCIÓN DE RESUMEN (CORREGIDA A LA DERECHA) --- */
+.cart-summary-section {
+    width: 100%;
+    max-width: 400px; /* Ancho del bloque de resumen */
+    margin-left: auto; /* ¡CLAVE! Esto empuja todo el bloque a la derecha */
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between; /* ¡CLAVE! Separa las palabras a la izquierda y derecha */
+    margin-bottom: 1.2rem;
+}
+
+.summary-line.total {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    margin-top: 1.5rem;
+}
+
+.checkout-button-container {
+    display: flex;
+    justify-content: flex-end; /* Alinea el botón a la derecha del contenedor */
+    margin-top: 2rem;
 }
 
 .checkout-button {
     background-color: #000;
     color: #fff;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    border: 1px solid #000;
+    padding: 1rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     cursor: pointer;
-    margin-top: 1.5rem;
-    transition: all 0.2s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    min-width: 200px; /* Ancho mínimo para el botón */
+}
+
+.checkout-button:hover {
+    background-color: #333;
+}
+
+.cart-empty-message {
+    text-align: center;
+    padding: 4rem 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 /* --- Estilos para el Modal de Quick View --- */
@@ -2851,7 +2932,7 @@ main {
     text-transform: uppercase;
     padding: 0;
 }
-/* --- Estilos para el Chatbot --- */
+/* --- Estilos para el Chatbot (Nuevo Diseño VOID) --- */
 .chatbot-container {
     position: fixed;
     bottom: 2rem;
@@ -2871,15 +2952,15 @@ main {
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease-in-out;
-    padding: 0; /* Reseteamos el padding */
+    transition: transform 0.2s ease-in-out, opacity 0.3s ease;
+    padding: 0;
+    opacity: 1;
 }
 
 .chatbot-toggle-button:hover {
     transform: scale(1.1);
 }
 
-/* Estilo para la imagen del logo en el botón */
 .chatbot-logo-img {
     width: 32px;
     height: 32px;
@@ -2887,18 +2968,15 @@ main {
 
 .chatbot-window {
     position: absolute;
-    bottom: 80px; /* Espacio sobre el botón */
+    bottom: 0;
     right: 0;
-    width: 350px;
-    height: 500px;
+    width: 380px;
+    height: 550px;
     background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    
-    /* Animación de entrada */
     transform: translateY(20px);
     opacity: 0;
     visibility: hidden;
@@ -2912,74 +2990,126 @@ main {
 }
 
 .chatbot-header {
-    background-color: #f1f1f1;
-    padding: 1rem;
-    text-align: center;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: var(--header-bg, #030324);
+    color: var(--text-color-inverse, #FFFFFF);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .chatbot-header h3 {
     margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+    font-family: var(--font-logo, 'Scheherazade New', serif);
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.chatbot-close-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
 }
 
 .chatbot-messages {
     flex-grow: 1;
-    padding: 1rem;
+    padding: 1.5rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
 }
 
 .message-bubble {
-    padding: 0.6rem 1rem;
-    border-radius: 18px;
-    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 85%;
     line-height: 1.5;
     font-size: 0.9rem;
+    position: relative;
+    font-family: var(--font-nav);
 }
 
-.message-bubble.user {
-    background-color: #000;
-    color: #fff;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
+/* La "colita" de la burbuja */
+.message-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
 }
 
 .message-bubble.bot {
-    background-color: #f1f1f1;
-    color: #000;
+    background-color: var(--header-bg, #030324);
+    color: var(--text-color-inverse, #FFFFFF);
     align-self: flex-start;
     border-bottom-left-radius: 4px;
 }
 
+.message-bubble.bot::after {
+    left: -8px;
+    border-right-color: var(--header-bg, #030324);
+    border-left: 0;
+    border-bottom: 0;
+    transform: translateY(-5px);
+}
+
+.message-bubble.user {
+    background-color: #f0f0f0;
+    color: #000;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message-bubble.user::after {
+    right: -8px;
+    border-left-color: #f0f0f0;
+    border-right: 0;
+    border-bottom: 0;
+    transform: translateY(-5px);
+}
+
 .chatbot-input-form {
     display: flex;
-    border-top: 1px solid #e0e0e0;
-    padding: 0.5rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    flex-shrink: 0;
 }
 
 .chatbot-input-form input {
     flex-grow: 1;
     border: none;
-    padding: 0.8rem;
+    border-bottom: 1px solid #000;
+    padding: 0.5rem 0;
     font-size: 0.9rem;
     outline: none;
     background: transparent;
+    font-family: var(--font-nav);
 }
 
-.chatbot-input-form button {
+.chatbot-input-form input:focus {
+    border-bottom-color: #555;
+}
+
+.chatbot-send-btn {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    margin-left: 1rem;
     color: #000;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    font-family: var(--font-nav);
 }
 
-.chatbot-input-form button:disabled {
+.chatbot-send-btn:disabled {
     color: #ccc;
     cursor: not-allowed;
 }

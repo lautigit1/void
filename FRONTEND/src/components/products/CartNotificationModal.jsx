@@ -1,10 +1,10 @@
+// En FRONTEND/src/components/products/CartNotificationModal.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 const CartNotificationModal = ({ product, onClose }) => {
     if (!product) return null;
 
-    // Calculamos el subtotal (ejemplo con un solo producto estático)
     const subtotal = product.precio;
 
     const formatPrice = (price) => {
@@ -57,11 +57,11 @@ const CartNotificationModal = ({ product, onClose }) => {
                 </div>
 
                 <div className="cart-notification-actions">
-                    {/* FIX: Corregido el texto del botón */}
-                    <Link to="/cart" className="action-button secondary-button">
+                    {/* --- ¡AQUÍ ESTÁ EL CAMBIO! --- */}
+                    {/* Le añadimos el evento onClick para que también cierre el modal */}
+                    <Link to="/cart" className="action-button secondary-button" onClick={onClose}>
                         VIEW BAG
                     </Link>
-                    {/* FIX: Corregido el texto del botón */}
                     <button onClick={onClose} className="action-button primary-button">
                         CONTINUE SHOPPING
                     </button>

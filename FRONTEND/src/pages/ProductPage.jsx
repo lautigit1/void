@@ -1,15 +1,18 @@
 // En FRONTEND/src/pages/ProductPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getProductById } from '@/services/api';
 import { useCart } from '@/hooks/useCart';
 
 const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
-    const [selectedSize, setSelectedSize] = useState('L');
+    // Los talles ahora vienen del producto
+    const availableSizes = product.variantes ? product.variantes.map(v => v.tamanio) : [];
+    
+    // Estado para el talle seleccionado, inicializado con el primero disponible
+    const [selectedSize, setSelectedSize] = useState(availableSizes.length > 0 ? availableSizes[0] : null);
+    
     const { addItem, isAddingItem } = useCart();
-
-    const availableSizes = ['S', 'M', 'L', 'XL'];
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
@@ -21,19 +24,38 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
     };
 
     const handleAddToCart = () => {
+        if (!selectedSize) {
+            alert("Por favor, selecciona un talle.");
+            return;
+        }
+
+        // --- LÓGICA CORREGIDA ---
+        // 1. Encontrar la variante completa que corresponde al talle seleccionado
+        const selectedVariant = product.variantes.find(v => v.tamanio === selectedSize);
+
+        if (!selectedVariant) {
+            console.error("No se encontró la variante para el talle seleccionado.");
+            return;
+        }
+
+        // 2. Usar el ID de la variante (ej: 101) en lugar del ID del producto (ej: 12)
         const item = {
-            variante_id: product.id,
+            variante_id: selectedVariant.id, // <-- ¡ESTE ES EL CAMBIO MÁS IMPORTANTE!
             quantity: 1,
             price: product.precio,
-            name: product.nombre,
+            name: `${product.nombre} (Talle: ${selectedVariant.tamanio})`, // Nombre más descriptivo
             image_url: product.urls_imagenes
         };
+
         addItem(item, {
             onSuccess: () => {
-                onAddToCartSuccess(product);
+                onAddToCartSuccess(product); // El modal de notificación no necesita cambiar
             }
         });
     };
+    
+    // Si no hay talles, el botón se deshabilita
+    const isOutOfStock = availableSizes.length === 0;
 
     return (
         <div className="product-details-container-full">
@@ -47,7 +69,7 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
                 <p className="product-price">{formatPrice(product.precio)} ARS</p>
                 
                 <div className="product-size-selector">
-                    <p className="size-label">VD SIZE: {selectedSize} / EN 52</p>
+                    <p className="size-label">SIZE: {selectedSize || 'NO DISPONIBLE'}</p>
                     <div className="size-buttons">
                         {availableSizes.map(size => (
                             <button
@@ -62,17 +84,15 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
                 </div>
 
                 <div className="product-description-full">
-                    <p>The Asymmetrical Shell Anorak, a signature piece from Void. Engineered from our proprietary Exo-Shell™ technical weave, a lightweight, water-repellent fabric designed for the urban landscape.</p>
-                    <p>Its defining feature is the convertible high-neck hood with an offset zip closure, revealing a contrasting graphite lining. The silhouette is cut for a relaxed, contemporary fit with dropped shoulders, while an shirred elastic hem and concealed storm cuffs provide both form and function.</p>
+                    <p>{product.descripcion || "Descripción no disponible."}</p>
                 </div>
                 
-                {/* --- BOTÓN CON LA CLASE ÚNICA DE CSS --- */}
                 <button 
                     onClick={handleAddToCart} 
-                    disabled={isAddingItem}
+                    disabled={isAddingItem || isOutOfStock}
                     className="void-add-to-bag-btn"
                 >
-                    {isAddingItem ? 'AGREGANDO...' : 'ADD TO BAG'}
+                    {isOutOfStock ? 'SIN STOCK' : (isAddingItem ? 'AGREGANDO...' : 'ADD TO BAG')}
                 </button>
             </div>
         </div>
@@ -93,9 +113,9 @@ const ProductPage = ({ onOpenCartModal, onSetAddedProduct }) => {
         onOpenCartModal();
     };
 
-    if (isLoading) return <div>Cargando...</div>;
-    if (error) return <div>Error al cargar el producto.</div>;
-    if (!product) return <div>Producto no encontrado.</div>;
+    if (isLoading) return <div style={{textAlign: 'center', padding: '5rem'}}>Cargando...</div>;
+    if (error) return <div style={{textAlign: 'center', padding: '5rem'}}>Error al cargar el producto.</div>;
+    if (!product) return <div style={{textAlign: 'center', padding: '5rem'}}>Producto no encontrado.</div>;
     
     return (
         <main>

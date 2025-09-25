@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
+from sqlalchemy.orm import selectinload # <-- 1. IMPORTACIÓN CLAVE
 from typing import List, Optional
 
 from schemas import product_schemas
@@ -11,7 +12,6 @@ from database.models import Producto
 
 from services import auth_services
 from schemas import user_schemas
-
 
 router = APIRouter(
     prefix="/api/products",
@@ -33,9 +33,13 @@ async def get_products(
     """
     Obtiene una lista de todos los productos, con filtros, paginación y ordenamiento.
     """
-    query = select(Producto)
+    # --- 2. MODIFICAMOS LA CONSULTA PARA CARGAR LAS VARIANTES ---
+    query = (
+        select(Producto)
+        .options(selectinload(Producto.variantes)) # ¡Esta línea soluciona el error!
+    )
     
-    # Filtros
+    # Filtros (sin cambios)
     if material:
         query = query.where(Producto.material.ilike(f"%{material}%"))
     if precio_max:
@@ -47,7 +51,7 @@ async def get_products(
     if color:
         query = query.where(Producto.color.ilike(f"%{color}%"))
     
-    # Ordenamiento
+    # Ordenamiento (sin cambios)
     if sort_by:
         if sort_by == "precio_asc":
             query = query.order_by(Producto.precio.asc())
@@ -58,11 +62,12 @@ async def get_products(
         elif sort_by == "nombre_desc":
             query = query.order_by(Producto.nombre.desc())
 
-    # Paginación
+    # Paginación (sin cambios)
     query = query.offset(skip).limit(limit)
     
     result = await db.execute(query)
-    products = result.scalars().all()
+    # Usamos .unique() para evitar duplicados si los filtros causan joins complejos
+    products = result.scalars().unique().all()
     
     return products
 
@@ -75,15 +80,19 @@ async def search_products(
     Busca productos por nombre o descripción.
     """
     search_term = f"%{q}%"
-    query = select(Producto).filter(
-        or_(
-            Producto.nombre.ilike(search_term),
-            Producto.descripcion.ilike(search_term)
+    query = (
+        select(Producto)
+        .options(selectinload(Producto.variantes)) # También lo añadimos aquí
+        .filter(
+            or_(
+                Producto.nombre.ilike(search_term),
+                Producto.descripcion.ilike(search_term)
+            )
         )
     )
     
     result = await db.execute(query)
-    products = result.scalars().all()
+    products = result.scalars().unique().all()
     
     return products
 
@@ -92,13 +101,22 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     """
     Obtiene el detalle de un solo producto por su ID.
     """
-    result = await db.execute(select(Producto).filter(Producto.id == product_id))
+    # --- 3. MODIFICAMOS TAMBIÉN ESTA CONSULTA ---
+    result = await db.execute(
+        select(Producto)
+        .options(selectinload(Producto.variantes)) # ¡Y esta!
+        .filter(Producto.id == product_id)
+    )
     product = result.scalars().first()
     
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
         
     return product
+
+# --- RUTAS DE ADMIN (POST, PUT, DELETE) SIN CAMBIOS ---
+# Estas rutas no devuelven una lista de productos con variantes,
+# por lo que no necesitan la modificación.
 
 @router.post(
     "/", 
@@ -111,10 +129,6 @@ async def create_product(
     db: AsyncSession = Depends(get_db),
     current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user) 
 ):
-    """
-    Crea un nuevo producto en la base de datos.
-    Requiere autenticación de administrador.
-    """
     existing_product_sku = await db.execute(
         select(Producto).filter(Producto.sku == product_in.sku)
     )
@@ -123,13 +137,10 @@ async def create_product(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Ya existe un producto con el SKU: {product_in.sku}"
         )
-
     new_product = Producto(**product_in.model_dump())
-    
     db.add(new_product)
     await db.commit()
     await db.refresh(new_product)
-    
     return new_product
 
 @router.put(
@@ -143,28 +154,18 @@ async def update_product(
     db: AsyncSession = Depends(get_db),
     current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user)
 ):
-    """
-    Actualiza un producto existente en la base de datos por su ID.
-    Solo los campos presentes en el JSON de entrada (product_in) serán actualizados.
-    Requiere autenticación de administrador.
-    """
     product_db = await db.get(Producto, product_id)
-    
     if not product_db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Producto no encontrado"
         )
-        
     update_data = product_in.model_dump(exclude_unset=True)
-    
     for key, value in update_data.items():
         setattr(product_db, key, value)
-        
     db.add(product_db)
     await db.commit()
     await db.refresh(product_db)
-    
     return product_db
 
 @router.delete(
@@ -177,19 +178,12 @@ async def delete_product(
     db: AsyncSession = Depends(get_db),
     current_admin: user_schemas.UserOut = Depends(auth_services.get_current_admin_user)
 ):
-    """
-    Elimina un producto de la base de datos por su ID.
-    Requiere autenticación de administrador.
-    """
     product_db = await db.get(Producto, product_id)
-    
     if not product_db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Producto no encontrado"
         )
-        
     await db.delete(product_db)
     await db.commit()
-    
     return {"message": "Product deleted successfully"}
