@@ -1,10 +1,16 @@
 # En BACKEND/main.py
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from database.database import engine
-from database.models import Base
+
+# Imports para la base de datos y modelos
+from database.database import engine, get_db
+from database.models import Base, Producto
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+# Imports para los routers
 from routers import health_router, auth_router, products_router, cart_router, admin_router, chatbot_router, checkout_router
 
 @asynccontextmanager
@@ -12,7 +18,6 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # Clean up the engine connection
     await engine.dispose()
 
 app = FastAPI(
@@ -22,28 +27,45 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# --- INICIO DEL CAMBIO ---
-
-# 1. Definimos la lista de "amigos" permitidos.
-#    Por ahora, solo el servidor de desarrollo de Vite/React.
+# --- Configuración de CORS ---
 origins = [
     "http://localhost:5173",
 ]
 
-# 2. Agregamos el middleware de CORS con la lista específica.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # <-- Usamos nuestra lista en vez de ["*"]
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- FIN DEL CAMBIO ---
-
 @app.get("/")
 def home():
     return {"mensaje": "Backend de VOID funcionando (Sprint 6)."}
+
+# --- CÓDIGO DE DIAGNÓSTICO TEMPORAL ---
+@app.get("/debug-products-json")
+async def debug_products_json(db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint de diagnóstico para ver los datos crudos de los productos.
+    """
+    result = await db.execute(select(Producto).limit(10))
+    products = result.scalars().all()
+    
+    # Convertimos los resultados a un formato simple para verlos en el navegador
+    products_list = [
+        {
+            "id": p.id,
+            "sku": p.sku,
+            "nombre": p.nombre,
+            "urls_imagenes": p.urls_imagenes
+        }
+        for p in products
+    ]
+    return {"data": products_list}
+# --- FIN DEL CÓDIGO DE DIAGNÓSTICO ---
+
 
 # Incluimos todos los routers
 app.include_router(health_router.router)

@@ -3129,3 +3129,135 @@ main {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1.0); }
 }
+/* --- ESTILOS REFINADOS PARA EL RESUMEN DEL CARRITO Y CHECKOUT --- */
+
+/* Contenedor general del resumen (lo usamos en CartPage y CartModal) */
+.cart-summary-section {
+    font-family: var(--font-nav); /* ¡Aplicamos Montserrat! */
+    font-size: 0.8rem;            /* Tamaño de letra sutil (12.8px) */
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: 100%;
+    max-width: 400px;             /* Ancho máximo del bloque */
+    margin-left: auto;            /* Lo alinea a la derecha */
+    margin-top: 2rem;
+}
+
+/* Cada línea (Subtotal, Shipping) */
+.cart-summary-section .summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    color: #333;
+}
+
+/* Línea del total */
+.cart-summary-section .summary-line.total {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #000;
+}
+
+/* Contenedor del botón de checkout */
+.checkout-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+/* Botón de Checkout principal */
+.checkout-button {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 1rem 1.5rem;
+    font-family: var(--font-nav);
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+}
+
+.checkout-button:hover {
+    background-color: #333;
+}
+
+/* Ajustes para el modal de notificación que es un poco diferente */
+.cart-notification-summary {
+    font-family: var(--font-nav);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cart-notification-summary .total-line {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+/* --- ESTILOS DEFINITIVOS PARA EL RESUMEN DE LA PÁGINA DEL CARRITO --- */
+
+/* Contenedor principal del resumen en la página /cart */
+.cart-page-container .cart-summary-section {
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    width: 100%;
+    max-width: 450px;
+    margin-left: auto;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee; /* Un separador visual sutil */
+}
+
+/* Cada línea (Subtotal, Envío) */
+.cart-page-container .summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+/* Línea del total */
+.cart-page-container .summary-line.total {
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding-top: 1.5rem;
+    border-top: 1px solid #000;
+}
+
+/* Contenedor del botón */
+.cart-page-container .checkout-button-container {
+    margin-top: 2rem;
+}
+
+/* Botón de checkout */
+.cart-page-container .checkout-button {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 1.1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+    display: block;
+}
+
+.cart-page-container .checkout-button:hover {
+    background-color: #333;
+}

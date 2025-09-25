@@ -2,10 +2,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const CartNotificationModal = ({ product, onClose }) => {
-    if (!product) return null;
+const CartNotificationModal = ({ item, onClose }) => {
+    if (!item) return null;
 
-    const subtotal = product.precio;
+    const subtotal = item.price;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
@@ -26,19 +26,19 @@ const CartNotificationModal = ({ product, onClose }) => {
                 </button>
                 
                 <div className="cart-notification-header">
-                    <h3>ITEM</h3>
+                    <h3>ITEM ADDED TO BAG</h3>
                 </div>
 
                 <div className="cart-notification-item">
                     <div className="cart-notification-image">
-                        <img src={product.urls_imagenes} alt={product.nombre} />
+                        <img src={item.image_url} alt={item.name} />
                     </div>
                     <div className="cart-notification-details">
                         <p>VOID</p>
-                        <p>{product.nombre}</p>
-                        <p>SIZE: L</p>
+                        <p>{item.name}</p>
+                        <p>SIZE: {item.size}</p>
                     </div>
-                    <p className="cart-notification-price">{formatPrice(product.precio)} ARS</p>
+                    <p className="cart-notification-price">{formatPrice(item.price)} ARS</p>
                 </div>
 
                 <div className="cart-notification-summary">
@@ -57,8 +57,6 @@ const CartNotificationModal = ({ product, onClose }) => {
                 </div>
 
                 <div className="cart-notification-actions">
-                    {/* --- ¡AQUÍ ESTÁ EL CAMBIO! --- */}
-                    {/* Le añadimos el evento onClick para que también cierre el modal */}
                     <Link to="/cart" className="action-button secondary-button" onClick={onClose}>
                         VIEW BAG
                     </Link>

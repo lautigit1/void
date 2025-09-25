@@ -1,7 +1,6 @@
 // En FRONTEND/src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// Se eliminaron las importaciones de 'QueryClient' y 'QueryClientProvider' de este archivo.
 import { useAuthStore } from '@/stores/useAuthStore.js';
 import { v4 as uuidv4 } from 'uuid'; 
 
@@ -34,14 +33,13 @@ const ProductManagement = lazy(() => import('@/components/admin/ProductManagemen
 const UserManagement = lazy(() => import('@/components/admin/UserManagement.jsx'));
 const OrderManagement = lazy(() => import('@/components/admin/OrderManagement.jsx'));
 
-// Se eliminó la creación del 'queryClient' de este archivo.
-
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logoPosition, setLogoPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const logoRef = useRef(null);
   const [isCartNotificationOpen, setIsCartNotificationOpen] = useState(false);
-  const [addedProduct, setAddedProduct] = useState(null);
+  // --- ¡CAMBIO #1: Renombramos el estado para mayor claridad! ---
+  const [addedItem, setAddedItem] = useState(null); 
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -51,7 +49,8 @@ function App() {
   const closeMenu = () => setIsMenuOpen(false);
   const handleOpenCartNotification = () => setIsCartNotificationOpen(true);
   const handleCloseCartNotification = () => setIsCartNotificationOpen(false);
-  const handleSetAddedProduct = (product) => setAddedProduct(product);
+  // --- ¡CAMBIO #2: Renombramos la función! ---
+  const handleSetAddedItem = (item) => setAddedItem(item);
   const handleOpenCartModal = () => setIsCartModalOpen(true);
   const handleCloseCartModal = () => setIsCartModalOpen(false);
   const handleOpenSearch = () => setIsSearchOpen(true);
@@ -85,7 +84,6 @@ function App() {
     document.body.classList.toggle('menu-open', isMenuOpen || isCartNotificationOpen || isCartModalOpen || isSearchOpen);
   }, [isMenuOpen, isCartNotificationOpen, isCartModalOpen, isSearchOpen]);
 
-  // Se ha eliminado el QueryClientProvider que envolvía al Router
   return (
     <Router>
       <div className="page-wrapper">
@@ -105,7 +103,8 @@ function App() {
                 path="/product/:productId" 
                 element={<ProductPage 
                             onOpenCartModal={handleOpenCartNotification} 
-                            onSetAddedProduct={handleSetAddedProduct}
+                            // --- ¡CAMBIO #3: Pasamos la nueva prop! ---
+                            onSetAddedItem={handleSetAddedItem}
                         />} 
             />
             <Route path="/login" element={<LoginPage />} />
@@ -137,7 +136,8 @@ function App() {
       
       {isCartNotificationOpen && (
         <CartNotificationModal 
-            product={addedProduct} 
+            // --- ¡CAMBIO #4: Pasamos el item en lugar del producto! ---
+            item={addedItem} 
             onClose={handleCloseCartNotification}
         />
       )}

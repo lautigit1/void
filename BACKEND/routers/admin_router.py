@@ -1,17 +1,23 @@
 # En BACKEND/routers/admin_router.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete, func
-from typing import List
-# CORREGIDO: Asumo que estos son los nombres de tus archivos de esquemas
-from schemas import admin_schemas, product_schemas, metrics_schemas, user_schemas
-from database.database import get_db, get_db_nosql
-# CORREGIDO: Importamos los modelos actualizados
-from database.models import Gasto, Orden, DetalleOrden, VarianteProducto, Producto, Categoria
-from services.auth_services import get_current_admin_user
-from pymongo.database import Database
+from sqlalchemy import select, func
+from typing import List, Optional
 from bson import ObjectId
+from pymongo.database import Database
+
+# Imports de esquemas
+from schemas import admin_schemas, product_schemas, metrics_schemas, user_schemas
+
+# Imports de la base de datos
+from database.database import get_db, get_db_nosql
+from database.models import Gasto, Orden, DetalleOrden, VarianteProducto, Producto, Categoria
+
+# Imports de servicios
+from services.auth_services import get_current_admin_user
+# --- 1. AQUÍ ESTÁ EL CAMBIO PRINCIPAL EN LA IMPORTACIÓN ---
+from services.image_uploader import upload_product_image 
 
 router = APIRouter(
     prefix="/api/admin",
@@ -19,7 +25,7 @@ router = APIRouter(
     dependencies=[Depends(get_current_admin_user)]
 )
 
-# --- Endpoints de Gastos (Estos estaban bien) ---
+# --- Endpoints de Gastos (Sin cambios) ---
 
 @router.get("/expenses", response_model=List[admin_schemas.Gasto])
 async def get_expenses(db: AsyncSession = Depends(get_db)):
@@ -35,20 +41,16 @@ async def create_expense(gasto: admin_schemas.GastoCreate, db: AsyncSession = De
     await db.refresh(new_expense)
     return new_expense
 
-# --- Endpoints de Ventas ---
+# --- Endpoints de Ventas (Sin cambios) ---
 
-@router.get("/sales", response_model=List[admin_schemas.Orden]) # Es bueno tipar la respuesta
+@router.get("/sales", response_model=List[admin_schemas.Orden])
 async def get_sales(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Orden))
     sales = result.scalars().all()
     return sales
 
-# NUEVA LÓGICA: Endpoint de venta manual adaptado a los nuevos modelos
 @router.post("/sales", status_code=201)
 async def create_manual_sale(sale_data: admin_schemas.ManualSaleCreate, db: AsyncSession = Depends(get_db)):
-    # NOTA: Tu esquema `ManualSaleCreate` ahora debe enviar una lista de `variante_producto_id`
-    
-    # Primero, calculamos el monto total basado en los precios de las variantes
     total_calculado = 0
     for item in sale_data.items:
         result = await db.execute(
@@ -60,16 +62,14 @@ async def create_manual_sale(sale_data: admin_schemas.ManualSaleCreate, db: Asyn
         total_calculado += precio_producto * item.cantidad
 
     new_order = Orden(
-        # CORREGIDO: Nombres de campos actualizados
         usuario_id=sale_data.usuario_id,
         monto_total=total_calculado,
         estado=sale_data.estado,
-        estado_pago="pagado" # Asumimos pago para venta manual
+        estado_pago="pagado"
     )
     db.add(new_order)
-    await db.flush() # Para obtener el ID de la nueva orden
+    await db.flush()
 
-    # Creamos los detalles de la orden usando la nueva tabla
     for item in sale_data.items:
         result = await db.execute(
             select(VarianteProducto.producto.precio).join(Producto).where(VarianteProducto.id == item.variante_producto_id)
@@ -89,34 +89,64 @@ async def create_manual_sale(sale_data: admin_schemas.ManualSaleCreate, db: Asyn
     return {"message": "Venta manual registrada exitosamente", "order_id": new_order.id}
 
 
-# --- Endpoints de Productos (Estos estaban bien) ---
+# --- Endpoints de Productos (MODIFICADOS) ---
 
 @router.post("/products", response_model=product_schemas.Product, status_code=status.HTTP_201_CREATED)
-async def create_product(product: product_schemas.ProductCreate, db: AsyncSession = Depends(get_db)):
-    db_product = Producto(**product.model_dump())
+async def create_product(
+    product_data: product_schemas.ProductCreate = Depends(),
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db)
+):
+    existing_product = await db.execute(select(Producto).filter(Producto.sku == product_data.sku))
+    if existing_product.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ya existe un producto con el SKU: {product_data.sku}"
+        )
+        
+    # --- 2. CAMBIO EN LA LLAMADA A LA FUNCIÓN ---
+    # Ya no usamos el prefijo 'image_uploader.'
+    image_url = await upload_product_image(file, product_data.sku)
+    
+    product_dict = product_data.model_dump()
+    product_dict["urls_imagenes"] = image_url
+
+    db_product = Producto(**product_dict)
+    
     db.add(db_product)
     await db.commit()
     await db.refresh(db_product)
     return db_product
 
+
 @router.put("/products/{product_id}", response_model=product_schemas.Product)
-async def update_product(product_id: int, product: product_schemas.ProductUpdate, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Producto).filter(Producto.id == product_id))
-    db_product = result.scalars().first()
+async def update_product(
+    product_id: int,
+    product_data: product_schemas.ProductUpdate = Depends(),
+    file: Optional[UploadFile] = File(None),
+    db: AsyncSession = Depends(get_db)
+):
+    db_product = await db.get(Producto, product_id)
     if not db_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado")
     
-    for key, value in product.model_dump(exclude_unset=True).items():
+    if file:
+        # --- 3. CAMBIO EN LA LLAMADA A LA FUNCIÓN ---
+        image_url = await upload_product_image(file, db_product.sku)
+        db_product.urls_imagenes = image_url
+
+    update_data = product_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_product, key, value)
     
     await db.commit()
     await db.refresh(db_product)
     return db_product
 
+
 @router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Producto).filter(Producto.id == product_id))
-    db_product = result.scalars().first()
+    db_product = await db.get(Producto, product_id)
     if not db_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado")
     
@@ -124,14 +154,13 @@ async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
     return
 
-# --- Endpoints de Usuarios (Estos estaban bien) ---
+
+# --- Endpoints de Usuarios (Sin cambios) ---
 
 @router.get("/users", response_model=List[user_schemas.UserOut])
 async def get_users(db: Database = Depends(get_db_nosql)):
     users_cursor = db.users.find({})
-    users = []
-    async for user in users_cursor:
-        users.append(user_schemas.UserOut(**user))
+    users = [user_schemas.UserOut(**user) async for user in users_cursor]
     return users
 
 @router.put("/users/{user_id}", response_model=user_schemas.UserOut)
@@ -153,11 +182,11 @@ async def update_user_role(user_id: str, user_update: user_schemas.UserUpdateRol
     updated_user = await db.users.find_one({"_id": object_id})
     return user_schemas.UserOut(**updated_user)
 
-# --- Endpoints de Métricas y Gráficos ---
+
+# --- Endpoints de Métricas y Gráficos (Sin cambios) ---
 
 @router.get("/metrics/kpis", response_model=metrics_schemas.KPIMetrics)
 async def get_kpis(db: AsyncSession = Depends(get_db), db_nosql: Database = Depends(get_db_nosql)):
-    # CORREGIDO: Se usa 'monto_total' en lugar de 'total'
     total_revenue_result = await db.execute(select(func.sum(Orden.monto_total)))
     total_revenue = total_revenue_result.scalar_one_or_none() or 0.0
 
@@ -179,7 +208,6 @@ async def get_kpis(db: AsyncSession = Depends(get_db), db_nosql: Database = Depe
         total_expenses=total_expenses
     )
 
-# NUEVA LÓGICA: Métricas de productos adaptadas a los nuevos modelos
 @router.get("/metrics/products", response_model=metrics_schemas.ProductMetrics)
 async def get_product_metrics(db: AsyncSession = Depends(get_db)):
     most_sold_product_result = await db.execute(
@@ -221,7 +249,6 @@ async def get_sales_over_time(db: AsyncSession = Depends(get_db)):
     sales_data = await db.execute(
         select(
             func.date(Orden.creado_en).label("fecha"),
-            # CORREGIDO: Se usa 'monto_total' en lugar de 'total'
             func.sum(Orden.monto_total).label("total")
         )
         .group_by(func.date(Orden.creado_en))

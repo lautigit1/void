@@ -1,9 +1,9 @@
+// En FRONTEND/src/pages/CartPage.jsx
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// La función fetchCart no cambia
 const fetchCart = async () => {
     try {
         const token = localStorage.getItem('authToken');
@@ -32,7 +32,6 @@ const CartPage = () => {
         queryFn: fetchCart,
     });
 
-    // La lógica de formatPrice y handleRemoveItem no cambia
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
             style: 'currency',
@@ -97,7 +96,7 @@ const CartPage = () => {
                                         <div className="item-details">
                                             <h3>VOID</h3>
                                             <p>{item.name}</p>
-                                            <p>SIZE: L</p>
+                                            <p>SIZE: {item.size}</p>
                                         </div>
                                     </div>
                                     <div className="item-info-right">
