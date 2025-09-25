@@ -1,7 +1,7 @@
 // En FRONTEND/src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// Se eliminaron las importaciones de 'QueryClient' y 'QueryClientProvider' de este archivo.
 import { useAuthStore } from '@/stores/useAuthStore.js';
 import { v4 as uuidv4 } from 'uuid'; 
 
@@ -13,7 +13,7 @@ import ProtectedRoute from '@/components/common/ProtectedRoute.jsx';
 import CartNotificationModal from '@/components/products/CartNotificationModal.jsx';
 import CartModal from '@/components/products/CartModal.jsx';
 import SearchModal from '@/components/common/SearchModal.jsx';
-import Chatbot from '@/components/common/Chatbot.jsx'; // <-- IMPORTAMOS EL CHATBOT
+import Chatbot from '@/components/common/Chatbot.jsx';
 
 // Layout para el panel de admin
 import AdminLayout from '@/pages/AdminLayout.jsx'; 
@@ -34,7 +34,7 @@ const ProductManagement = lazy(() => import('@/components/admin/ProductManagemen
 const UserManagement = lazy(() => import('@/components/admin/UserManagement.jsx'));
 const OrderManagement = lazy(() => import('@/components/admin/OrderManagement.jsx'));
 
-const queryClient = new QueryClient();
+// Se eliminó la creación del 'queryClient' de este archivo.
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -85,72 +85,71 @@ function App() {
     document.body.classList.toggle('menu-open', isMenuOpen || isCartNotificationOpen || isCartModalOpen || isSearchOpen);
   }, [isMenuOpen, isCartNotificationOpen, isCartModalOpen, isSearchOpen]);
 
+  // Se ha eliminado el QueryClientProvider que envolvía al Router
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="page-wrapper">
-          <Navbar 
-            isMenuOpen={isMenuOpen} 
-            onToggleMenu={toggleMenu} 
-            onOpenCart={handleOpenCartModal} 
-            onOpenSearch={handleOpenSearch}
-            ref={logoRef} 
-          />
-          
-          <Suspense fallback={<div style={{textAlign: 'center', padding: '5rem'}}>Cargando...</div>}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/catalog/:categoryName" element={<CatalogPage />} />
-              <Route 
-                  path="/product/:productId" 
-                  element={<ProductPage 
-                              onOpenCartModal={handleOpenCartNotification} 
-                              onSetAddedProduct={handleSetAddedProduct}
-                          />} 
-              />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<RegisterPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/search" element={<SearchResultsPage />} />
-              
-              <Route 
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<AdminDashboard />} /> 
-                <Route path="products" element={<ProductManagement />} />
-                <Route path="users" element={<UserManagement />} />
-                <Route path="orders" element={<OrderManagement />} />
-              </Route>
-            </Routes>
-          </Suspense>
-          
-          <Footer />
-        </div>
+    <Router>
+      <div className="page-wrapper">
+        <Navbar 
+          isMenuOpen={isMenuOpen} 
+          onToggleMenu={toggleMenu} 
+          onOpenCart={handleOpenCartModal} 
+          onOpenSearch={handleOpenSearch}
+          ref={logoRef} 
+        />
+        
+        <Suspense fallback={<div style={{textAlign: 'center', padding: '5rem'}}>Cargando...</div>}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/catalog/:categoryName" element={<CatalogPage />} />
+            <Route 
+                path="/product/:productId" 
+                element={<ProductPage 
+                            onOpenCartModal={handleOpenCartNotification} 
+                            onSetAddedProduct={handleSetAddedProduct}
+                        />} 
+            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<RegisterPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/search" element={<SearchResultsPage />} />
+            
+            <Route 
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} /> 
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
+            </Route>
+          </Routes>
+        </Suspense>
+        
+        <Footer />
+      </div>
 
-        <DropdownMenu isOpen={isMenuOpen} onClose={closeMenu} logoPosition={logoPosition} />
-        
-        {isCartNotificationOpen && (
-          <CartNotificationModal 
-              product={addedProduct} 
-              onClose={handleCloseCartNotification}
-          />
-        )}
-        
-        {isCartModalOpen && (
-            <CartModal isOpen={isCartModalOpen} onClose={handleCloseCartModal} />
-        )}
+      <DropdownMenu isOpen={isMenuOpen} onClose={closeMenu} logoPosition={logoPosition} />
+      
+      {isCartNotificationOpen && (
+        <CartNotificationModal 
+            product={addedProduct} 
+            onClose={handleCloseCartNotification}
+        />
+      )}
+      
+      {isCartModalOpen && (
+          <CartModal isOpen={isCartModalOpen} onClose={handleCloseCartModal} />
+      )}
 
-        <SearchModal isOpen={isSearchOpen} onClose={handleCloseSearch} />
-        
-        <Chatbot /> {/* <-- ACÁ ESTÁ EL CHATBOT */}
-      </Router>
-    </QueryClientProvider>
+      <SearchModal isOpen={isSearchOpen} onClose={handleCloseSearch} />
+      
+      <Chatbot />
+    </Router>
   );
 }
 
