@@ -1,33 +1,38 @@
+// En FRONTEND/src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from './stores/useAuthStore.js';
+import { useAuthStore } from '@/stores/useAuthStore.js';
 import { v4 as uuidv4 } from 'uuid'; 
 
 // Componentes comunes
-import Navbar from './components/common/Navbar.jsx';
-import Footer from './components/common/Footer.jsx';
-import DropdownMenu from './components/common/DropdownMenu.jsx';
-import ProtectedRoute from './components/common/ProtectedRoute.jsx';
-import CartNotificationModal from './components/products/CartNotificationModal.jsx';
-import CartModal from './components/products/CartModal.jsx';
+import Navbar from '@/components/common/Navbar.jsx';
+import Footer from '@/components/common/Footer.jsx';
+import DropdownMenu from '@/components/common/DropdownMenu.jsx';
+import ProtectedRoute from '@/components/common/ProtectedRoute.jsx';
+import CartNotificationModal from '@/components/products/CartNotificationModal.jsx';
+import CartModal from '@/components/products/CartModal.jsx';
+import SearchModal from '@/components/common/SearchModal.jsx';
+import Chatbot from '@/components/common/Chatbot.jsx'; // <-- IMPORTAMOS EL CHATBOT
 
 // Layout para el panel de admin
-import AdminLayout from './pages/AdminLayout.jsx'; 
+import AdminLayout from '@/pages/AdminLayout.jsx'; 
 
 // Lazy Loading para las páginas públicas
-const HomePage = lazy(() => import('./pages/HomePage.jsx'));
-const CatalogPage = lazy(() => import('./pages/CatalogPage.jsx'));
-const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
-const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
-const ProductPage = lazy(() => import('./pages/ProductPage.jsx'));
-const CartPage = lazy(() => import('./pages/CartPage.jsx'));
+const HomePage = lazy(() => import('@/pages/HomePage.jsx'));
+const CatalogPage = lazy(() => import('@/pages/CatalogPage.jsx'));
+const LoginPage = lazy(() => import('@/pages/LoginPage.jsx'));
+const RegisterPage = lazy(() => import('@/pages/RegisterPage.jsx'));
+const ProductPage = lazy(() => import('@/pages/ProductPage.jsx'));
+const CartPage = lazy(() => import('@/pages/CartPage.jsx'));
+const CheckoutPage = lazy(() => import('@/pages/CheckoutPage.jsx'));
+const SearchResultsPage = lazy(() => import('@/pages/SearchResultsPage.jsx'));
 
 // Lazy Loading para las secciones del Admin Panel
-const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard.jsx'));
-const ProductManagement = lazy(() => import('./components/admin/ProductManagement.jsx'));
-const UserManagement = lazy(() => import('./components/admin/UserManagement.jsx'));
-const OrderManagement = lazy(() => import('./components/admin/OrderManagement.jsx'));
+const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard.jsx'));
+const ProductManagement = lazy(() => import('@/components/admin/ProductManagement.jsx'));
+const UserManagement = lazy(() => import('@/components/admin/UserManagement.jsx'));
+const OrderManagement = lazy(() => import('@/components/admin/OrderManagement.jsx'));
 
 const queryClient = new QueryClient();
 
@@ -38,6 +43,7 @@ function App() {
   const [isCartNotificationOpen, setIsCartNotificationOpen] = useState(false);
   const [addedProduct, setAddedProduct] = useState(null);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const { checkAuth } = useAuthStore();
 
@@ -48,6 +54,8 @@ function App() {
   const handleSetAddedProduct = (product) => setAddedProduct(product);
   const handleOpenCartModal = () => setIsCartModalOpen(true);
   const handleCloseCartModal = () => setIsCartModalOpen(false);
+  const handleOpenSearch = () => setIsSearchOpen(true);
+  const handleCloseSearch = () => setIsSearchOpen(false);
 
   useEffect(() => {
     let guestId = localStorage.getItem('guestSessionId');
@@ -74,8 +82,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle('menu-open', isMenuOpen || isCartNotificationOpen || isCartModalOpen);
-  }, [isMenuOpen, isCartNotificationOpen, isCartModalOpen]);
+    document.body.classList.toggle('menu-open', isMenuOpen || isCartNotificationOpen || isCartModalOpen || isSearchOpen);
+  }, [isMenuOpen, isCartNotificationOpen, isCartModalOpen, isSearchOpen]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -85,6 +93,7 @@ function App() {
             isMenuOpen={isMenuOpen} 
             onToggleMenu={toggleMenu} 
             onOpenCart={handleOpenCartModal} 
+            onOpenSearch={handleOpenSearch}
             ref={logoRef} 
           />
           
@@ -102,6 +111,8 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<RegisterPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/search" element={<SearchResultsPage />} />
               
               <Route 
                 path="/admin"
@@ -134,6 +145,10 @@ function App() {
         {isCartModalOpen && (
             <CartModal isOpen={isCartModalOpen} onClose={handleCloseCartModal} />
         )}
+
+        <SearchModal isOpen={isSearchOpen} onClose={handleCloseSearch} />
+        
+        <Chatbot /> {/* <-- ACÁ ESTÁ EL CHATBOT */}
       </Router>
     </QueryClientProvider>
   );

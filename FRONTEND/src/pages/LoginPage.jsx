@@ -1,7 +1,8 @@
+// En FRONTEND/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useAuthStore } from '../stores/useAuthStore';
+import { useAuthStore } from '@/stores/useAuthStore'; // <-- RUTA CORREGIDA CON ALIAS
+import { loginUser } from '@/services/api'; // <-- RUTA CORREGIDA CON ALIAS
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -15,23 +16,14 @@ const LoginPage = () => {
     setError('');
 
     const formData = new URLSearchParams();
-    formData.append('username', email); // El backend espera 'username' para el email
+    formData.append('username', email);
     formData.append('password', password);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-
-      const { access_token } = response.data;
-      
-      // FIX: Ahora solo pasamos el token a la función de login del store
-      await login(access_token);
-
+      const data = await loginUser(formData);
+      await login(data.access_token);
       console.log('Login exitoso!');
-      navigate('/'); // Redirigimos al home
+      navigate('/');
 
     } catch (err) {
       console.error('Error en el login:', err);

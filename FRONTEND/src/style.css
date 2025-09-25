@@ -482,15 +482,17 @@ main {
     color: #333;
 }
 
+/* --- Pegá o reemplazá esto en tu style.css --- */
+
 .title-line {
-    width: 1px;
-    height: 100px;
-    background-color: #333;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 0.75rem;
+    width: 1px; /* Ancho de 1 píxel para que sea una línea fina */
+    height: 100px; /* El largo de la línea hacia abajo */
+    background-color: #333; /* El color de la línea */
+    position: absolute; /* Posición relativa al contenedor */
+    top: 100%; /* Empieza justo debajo del texto */
+    left: 50%; /* Centrada horizontalmente */
+    transform: translateX(-50%); /* Ajuste fino para el centrado perfecto */
+    margin-top: 0.75rem; /* Un pequeño espacio entre el texto y la línea */
 }
 
 .product-grid {
@@ -938,8 +940,8 @@ main {
   letter-spacing: 0.05em;
   color: #888;
   text-decoration: none;
-  margin-top: -1.5rem;
-  margin-bottom: 2.5rem;
+  margin-top: 0.5rem;     /* <-- ¡ACÁ ESTÁ EL CAMBIO! De negativo a positivo */
+  margin-bottom: 2.5rem;  /* Mantenemos el espacio de abajo */
 }
 
 .error-message {
@@ -1537,23 +1539,6 @@ main {
     font-size: 0.9rem;
     line-height: 1.6;
 }
-
-.add-to-cart-button {
-    background-color: #000;
-    color: #fff;
-    border: 1px solid #000;
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.add-to-cart-button:hover {
-    background-color: #333;
-}
-
 /* --- Estilos para la Vista del Carrito (Page) --- */
 
 .cart-page-container {
@@ -2445,4 +2430,572 @@ main {
     padding: 4rem 0;
     border-top: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
+}
+/* --- ESTILOS PARA EL BOTÓN FACHERO (A PRUEBA DE BALAS) --- */
+.void-add-to-bag-btn {
+  /* Dimensiones y Caja */
+  width: 100%;
+  display: block;
+  padding: 0.75rem 1rem; /* 12px arriba/abajo, 16px a los costados */
+  
+  /* Apariencia */
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+  
+  /* Tipografía */
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem; /* 12px, para que quede sutil */
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+
+  /* Comportamiento */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Efecto al pasar el mouse (si no está deshabilitado) */
+.void-add-to-bag-btn:hover:not(:disabled) {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Estilo cuando está deshabilitado */
+.void-add-to-bag-btn:disabled {
+  background-color: #f3f4f6; /* Un gris clarito */
+  border-color: #d1d5db; /* Borde gris */
+  color: #9ca3af;       /* Texto gris */
+  cursor: not-allowed;
+}
+/* --- Checkout Page Styles (a la medida de la imagen) --- */
+
+.checkout-page-container {
+    max-width: 1200px; /* Ancho máximo similar al de la imagen */
+    margin: 60px auto 100px auto; /* Margen superior e inferior, centrado */
+    padding: 0 20px; /* Padding a los costados */
+}
+
+.checkout-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem; /* Tamaño de letra del título */
+    font-weight: 600; /* Negrita */
+    letter-spacing: 0.15em; /* Espaciado entre letras */
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 60px; /* Espacio debajo del título principal */
+}
+
+.checkout-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 80px; /* Espacio entre las dos columnas */
+}
+
+.checkout-form-section {
+    flex: 2; /* Que ocupe 2/3 del espacio */
+}
+
+.order-summary-section {
+    flex: 1; /* Que ocupe 1/3 del espacio */
+}
+
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem; /* Tamaño de letra de los títulos de sección */
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-bottom: 8px; /* Espacio debajo del título */
+    border-bottom: 1px solid #ccc; /* Línea divisoria */
+    margin-bottom: 30px; /* Espacio debajo de la línea */
+}
+
+/* Formulario */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+    gap: 30px; /* Espacio entre los campos del formulario */
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px; /* Espacio entre grupos de input */
+}
+
+.input-group.full-width {
+    grid-column: span 2; /* Ocupa las dos columnas */
+}
+
+.input-group label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem; /* Letra pequeña para los labels */
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.input-group input[type="text"] {
+    border: none;
+    border-bottom: 1px solid #ccc; /* Línea de abajo */
+    padding: 8px 0;
+    font-family: 'Open Sans', sans-serif; /* Usamos una fuente más estándar para inputs */
+    font-size: 0.9rem;
+    color: #333;
+    outline: none; /* Quitamos el outline al hacer foco */
+    background-color: transparent; /* Fondo transparente */
+}
+
+.input-group input[type="text"]:focus {
+    border-color: #000; /* Borde negro al hacer foco */
+}
+
+/* Margen superior para los títulos de sección */
+.mt-8 {
+    margin-top: 80px !important; /* Más espacio arriba para secciones grandes */
+}
+
+/* Opciones de Envío y Pago (Radio buttons) */
+.shipping-options, .payment-options {
+    margin-bottom: 40px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+    /* Estilos personalizados para el radio button */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #999;
+    border-radius: 50%;
+    margin-right: 10px;
+    outline: none;
+    position: relative;
+    cursor: pointer;
+}
+
+.radio-option input[type="radio"]:checked {
+    border-color: #000; /* Borde negro cuando seleccionado */
+}
+
+.radio-option input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    background-color: #000; /* Círculo negro dentro */
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.radio-option .description {
+    font-size: 0.75rem;
+    color: #777;
+    margin-left: 5px; /* Pequeño margen para la descripción */
+}
+
+.radio-option span {
+    font-weight: 600; /* Precio del envío en negrita */
+    margin-right: 5px;
+}
+
+
+/* Resumen del Pedido */
+.order-summary-section .section-title {
+    margin-bottom: 30px; /* Igual que en el formulario */
+}
+
+.order-item {
+    display: flex;
+    align-items: flex-start; /* Alinea arriba si el texto es largo */
+    margin-bottom: 25px; /* Espacio entre items */
+}
+
+.order-item-image {
+    width: 70px; /* Tamaño de la imagen del producto */
+    height: 70px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.order-item-details {
+    flex-grow: 1; /* Ocupa el espacio restante */
+}
+
+.order-item-details .item-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.order-item-details .item-size {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.order-item .item-price {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap; /* Evita que el precio se rompa en varias líneas */
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    margin-top: 15px; /* Espacio entre líneas del resumen */
+    padding-top: 15px; /* Espacio interno superior */
+    border-top: 1px solid #eee; /* Línea divisoria sutil */
+}
+
+.summary-line:first-of-type {
+    margin-top: 30px; /* Más espacio para el primer resumen */
+    border-top: none; /* No hay línea antes del primer item */
+    padding-top: 0;
+}
+
+.summary-line span:first-child {
+    font-weight: 600; /* Labels en negrita */
+}
+
+.summary-line.total {
+    font-size: 1.1rem; /* Total más grande */
+    font-weight: 700;
+    margin-top: 30px; /* Más espacio para el total */
+    padding-top: 20px;
+    border-top: 1px solid #ccc; /* Línea más gruesa para el total */
+}
+
+.place-order-button {
+    width: 100%;
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 15px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 30px; /* Espacio arriba del botón */
+}
+
+.place-order-button:hover {
+    background-color: #fff;
+    color: #000;
+}
+
+
+/* Responsive para móviles, si aplica */
+@media (max-width: 768px) {
+    .checkout-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr; /* Una columna en móviles */
+    }
+    
+    .input-group.full-width {
+        grid-column: span 1; /* También una columna en móviles */
+    }
+
+    .checkout-title {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 0.8rem;
+        margin-top: 40px;
+    }
+}
+/* --- ESTILOS A PRUEBA DE TODO PARA EL TÍTULO "THE NEW" --- */
+.title-the-new-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 4rem;      /* Espacio superior */
+    margin-bottom: 10rem;    /* Espacio inferior hasta la grilla de productos */
+    position: relative;
+}
+
+.title-the-new-text {
+    font-family: 'Scheherazade New', serif; /* La fuente de tu logo */
+    font-weight: 400;
+    font-size: 3rem; /* 48px */
+    letter-spacing: 0.02em;
+    color: #333;
+}
+
+.title-the-new-line {
+    width: 1px;
+    height: 100px;
+    background-color: #333;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.75rem; /* 12px de separación */
+}
+/* --- Estilos para el botón de búsqueda en el Navbar --- */
+.search-button {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* --- Estilos para el Modal de Búsqueda --- */
+.search-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.search-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 700px;
+}
+
+.search-form {
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #000;
+    padding: 1rem 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-align: center;
+    color: #000;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #ccc;
+}
+
+.search-modal-close-btn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;
+}
+/* --- Estilos para el input de búsqueda activo en la Navbar --- */
+.search-input-active {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: white; /* Color del texto que escribís */
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px; /* Mismo tamaño que el label "SEARCH" */
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0;
+}
+/* --- Estilos para el Chatbot --- */
+.chatbot-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+}
+
+.chatbot-toggle-button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+    padding: 0; /* Reseteamos el padding */
+}
+
+.chatbot-toggle-button:hover {
+    transform: scale(1.1);
+}
+
+/* Estilo para la imagen del logo en el botón */
+.chatbot-logo-img {
+    width: 32px;
+    height: 32px;
+}
+
+.chatbot-window {
+    position: absolute;
+    bottom: 80px; /* Espacio sobre el botón */
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    /* Animación de entrada */
+    transform: translateY(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.chatbot-window.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.chatbot-header {
+    background-color: #f1f1f1;
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chatbot-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.chatbot-messages {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.message-bubble {
+    padding: 0.6rem 1rem;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.message-bubble.user {
+    background-color: #000;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message-bubble.bot {
+    background-color: #f1f1f1;
+    color: #000;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.chatbot-input-form {
+    display: flex;
+    border-top: 1px solid #e0e0e0;
+    padding: 0.5rem;
+}
+
+.chatbot-input-form input {
+    flex-grow: 1;
+    border: none;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    outline: none;
+    background: transparent;
+}
+
+.chatbot-input-form button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: #000;
+}
+
+.chatbot-input-form button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Indicador de "escribiendo..." */
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background-color: #999;
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-of-type(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-of-type(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
 }

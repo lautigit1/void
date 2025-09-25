@@ -1,15 +1,10 @@
+// En FRONTEND/src/pages/CatalogPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query'; // <-- Importamos React Query
-import axios from 'axios';
-import FilterPanel from '../components/common/FilterPanel.jsx';
-import QuickViewModal from '../components/products/QuickViewModal.jsx';
-
-// Función para obtener los productos de la API
-const fetchProducts = async () => {
-  const { data } = await axios.get('http://localhost:8000/api/products');
-  return data;
-};
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import FilterPanel from '@/components/common/FilterPanel.jsx'; // <-- RUTA CORREGIDA CON ALIAS
+import QuickViewModal from '@/components/products/QuickViewModal.jsx'; // <-- RUTA CORREGIDA CON ALIAS
+import { getProducts } from '@/services/api'; // <-- RUTA CORREGIDA CON ALIAS
 
 // Componente placeholder para una carga más elegante
 const ProductCardSkeleton = () => (
@@ -28,10 +23,10 @@ const CatalogPage = () => {
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
-    // Usamos useQuery para obtener los datos de la API
+    // Usamos useQuery con nuestra función de servicio centralizada
     const { data: products, isLoading, error } = useQuery({
       queryKey: ['products'],
-      queryFn: fetchProducts,
+      queryFn: getProducts,
     });
 
     useEffect(() => {
@@ -73,7 +68,6 @@ const CatalogPage = () => {
                     <button onClick={toggleFilterPanel} className="filters-link">FILTERS &gt;</button>
                 </div>
 
-                {/* Manejamos los estados de carga y error de la API */}
                 {isLoading ? (
                   <div className="catalog-product-grid">
                       {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}

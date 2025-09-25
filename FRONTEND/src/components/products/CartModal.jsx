@@ -1,39 +1,16 @@
+// En FRONTEND/src/components/products/CartModal.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-
-const fetchCart = async () => {
-    try {
-        const token = localStorage.getItem('authToken');
-        const guestId = localStorage.getItem('guestSessionId');
-        
-        const headers = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        } else if (guestId) {
-            headers['X-Guest-Session-ID'] = guestId;
-        }
-
-        const { data } = await axios.get('http://localhost:8000/api/cart/', { headers });
-        return data;
-    } catch (error) {
-        console.error("Error fetching cart:", error);
-        throw error;
-    }
-};
+import { useCart } from '../../hooks/useCart'; // <-- ¡Importamos el hook!
 
 const CartModal = ({ isOpen, onClose }) => {
-    const queryClient = useQueryClient();
-    const { data: cart, isLoading, error } = useQuery({
-        queryKey: ['cart'],
-        queryFn: fetchCart,
-        enabled: isOpen,
-    });
+    // ¡Toda la lógica compleja ahora vive en una sola línea!
+    const { cart, isLoading, error, removeItem } = useCart();
     
     if (!isOpen) return null;
+    
     if (isLoading) return <div className="cart-modal-overlay"><div className="cart-modal-content"><p>Cargando carrito...</p></div></div>;
-    if (error) return <div className="cart-modal-overlay"><div className="cart-modal-content"><p>Error al cargar el carrito. Por favor, asegúrate de haber iniciado sesión o de haber añadido un producto previamente.</p></div></div>;
+    if (error) return <div className="cart-modal-overlay"><div className="cart-modal-content"><p>Error al cargar el carrito.</p></div></div>;
 
     const subtotal = cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
     const orderTotal = subtotal;
@@ -47,23 +24,8 @@ const CartModal = ({ isOpen, onClose }) => {
         }).format(price).replace("ARS", "$").trim();
     };
 
-    const handleRemoveItem = async (variante_id) => {
-        const token = localStorage.getItem('authToken');
-        const guestId = localStorage.getItem('guestSessionId');
-        
-        const headers = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        } else if (guestId) {
-            headers['X-Guest-Session-ID'] = guestId;
-        }
-
-        try {
-            await axios.delete(`http://localhost:8000/api/cart/items/${variante_id}`, { headers });
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-        } catch (error) {
-            console.error("Error removing item:", error);
-        }
+    const handleRemoveItem = (variante_id) => {
+        removeItem(variante_id);
     };
 
     return (

@@ -1,21 +1,15 @@
 // En FRONTEND/src/pages/ProductPage.jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // Importamos useMutation y useQueryClient
-import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-});
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getProductById } from '@/services/api';
+import { useCart } from '@/hooks/useCart';
 
 const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
-    const navigate = useNavigate();
     const [selectedSize, setSelectedSize] = useState('L');
-    const queryClient = useQueryClient();
+    const { addItem, isAddingItem } = useCart();
 
     const availableSizes = ['S', 'M', 'L', 'XL'];
-    const availableColors = ['Black', 'White', 'Gray'];
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
@@ -26,39 +20,19 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
         }).format(price).replace("ARS", "$").trim();
     };
 
-    // Usamos useMutation para enviar datos al backend
-    const { mutate: addToCart } = useMutation({
-        mutationFn: async (item) => {
-            const token = localStorage.getItem('authToken');
-            let guestId = localStorage.getItem('guestSessionId');
-            if (!guestId) {
-                guestId = uuidv4();
-                localStorage.setItem('guestSessionId', guestId);
-            }
-            
-            const headers = { 'X-Guest-Session-ID': guestId };
-            if (token) {
-                headers.Authorization = `Bearer ${token}`;
-            }
-
-            const response = await api.post('/cart/items', item, { headers });
-            return response.data;
-        },
-        onSuccess: (updatedCart) => {
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-            onAddToCartSuccess(product);
-        },
-    });
-
     const handleAddToCart = () => {
         const item = {
-            variante_id: product.id, // Suponemos que el ID del producto es el de la variante
+            variante_id: product.id,
             quantity: 1,
             price: product.precio,
             name: product.nombre,
             image_url: product.urls_imagenes
         };
-        addToCart(item);
+        addItem(item, {
+            onSuccess: () => {
+                onAddToCartSuccess(product);
+            }
+        });
     };
 
     return (
@@ -91,7 +65,15 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
                     <p>The Asymmetrical Shell Anorak, a signature piece from Void. Engineered from our proprietary Exo-Shell™ technical weave, a lightweight, water-repellent fabric designed for the urban landscape.</p>
                     <p>Its defining feature is the convertible high-neck hood with an offset zip closure, revealing a contrasting graphite lining. The silhouette is cut for a relaxed, contemporary fit with dropped shoulders, while an shirred elastic hem and concealed storm cuffs provide both form and function.</p>
                 </div>
-                <button onClick={handleAddToCart} className="add-to-cart-button">ADD TO BAG</button>
+                
+                {/* --- BOTÓN CON LA CLASE ÚNICA DE CSS --- */}
+                <button 
+                    onClick={handleAddToCart} 
+                    disabled={isAddingItem}
+                    className="void-add-to-bag-btn"
+                >
+                    {isAddingItem ? 'AGREGANDO...' : 'ADD TO BAG'}
+                </button>
             </div>
         </div>
     );
@@ -99,14 +81,10 @@ const ProductDetailsContent = ({ product, onAddToCartSuccess }) => {
 
 const ProductPage = ({ onOpenCartModal, onSetAddedProduct }) => {
     const { productId } = useParams();
-    const navigate = useNavigate();
 
     const { data: product, isLoading, error } = useQuery({
       queryKey: ['product', productId],
-      queryFn: async () => {
-        const { data } = await api.get(`/products/${productId}`);
-        return data;
-      },
+      queryFn: () => getProductById(productId),
       enabled: !!productId
     });
 
@@ -127,4 +105,3 @@ const ProductPage = ({ onOpenCartModal, onSetAddedProduct }) => {
 };
 
 export default ProductPage;
-export { ProductDetailsContent };

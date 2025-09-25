@@ -80,10 +80,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="new-arrivals">
-        <div className="section-title-container">
-          <h2 className="section-title">THE NEW</h2>
-          <div className="title-line"></div>
+            <section className="new-arrivals">
+        <div className="title-the-new-container">
+          <h2 className="title-the-new-text">THE NEW</h2>
+          <div className="title-the-new-line"></div>
         </div>
 
         <div className="product-grid">

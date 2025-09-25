@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from typing import List, Optional
 
 from schemas import product_schemas
@@ -66,6 +66,26 @@ async def get_products(
     
     return products
 
+@router.get("/search", response_model=List[product_schemas.Product])
+async def search_products(
+    q: str = Query(..., min_length=1, description="Término de búsqueda"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Busca productos por nombre o descripción.
+    """
+    search_term = f"%{q}%"
+    query = select(Producto).filter(
+        or_(
+            Producto.nombre.ilike(search_term),
+            Producto.descripcion.ilike(search_term)
+        )
+    )
+    
+    result = await db.execute(query)
+    products = result.scalars().all()
+    
+    return products
 
 @router.get("/{product_id}", response_model=product_schemas.Product)
 async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
@@ -147,7 +167,6 @@ async def update_product(
     
     return product_db
 
-# --- NUEVO ENDPOINT DELETE ---
 @router.delete(
     "/{product_id}",
     status_code=status.HTTP_200_OK,
@@ -162,7 +181,6 @@ async def delete_product(
     Elimina un producto de la base de datos por su ID.
     Requiere autenticación de administrador.
     """
-    # 1. Buscar el producto por ID
     product_db = await db.get(Producto, product_id)
     
     if not product_db:
@@ -171,9 +189,7 @@ async def delete_product(
             detail="Producto no encontrado"
         )
         
-    # 2. Eliminar el producto
     await db.delete(product_db)
     await db.commit()
     
-    # 3. Devolver mensaje de éxito (como espera el test)
     return {"message": "Product deleted successfully"}
