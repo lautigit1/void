@@ -1,6 +1,7 @@
 // En FRONTEND/src/pages/CheckoutPage.jsx
 import React, { useState } from 'react';
-import { useCart } from '@/hooks/useCart'; // Asegurate de tener el hook useCart si ya lo hiciste
+import { useCart } from '@/hooks/useCart';
+import { createMercadoPagoPreference } from '@/services/api'; // ¡Importamos la nueva función!
 
 const CheckoutPage = () => {
     // Estado para los campos del formulario
@@ -35,13 +36,32 @@ const CheckoutPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handlePlaceOrder = (e) => {
+    // --- ¡AQUÍ ESTÁ LA LÓGICA MODIFICADA! ---
+    const handlePlaceOrder = async (e) => {
         e.preventDefault();
-        // Aquí iría la lógica para enviar el pedido a la API
-        console.log('Pedido realizado con:', { formData, shippingMethod, paymentMethod, cart, total });
-        alert('Pedido realizado! (Revisa la consola para los detalles)');
-        // Luego de un envío exitoso, podrías redirigir al usuario a una página de confirmación
-        // navigate('/order-confirmation'); 
+
+        if (paymentMethod !== 'mercadoPago') {
+            alert('Por favor, selecciona Mercado Pago como método de pago para continuar.');
+            return;
+        }
+
+        if (!cart || cart.items.length === 0) {
+            alert('Tu carrito está vacío.');
+            return;
+        }
+
+        try {
+            // 1. Llamamos al backend para crear la preferencia de pago
+            const preference = await createMercadoPagoPreference(cart);
+            
+            // 2. Si todo sale bien, redirigimos al usuario al checkout de MP
+            if (preference.init_point) {
+                window.location.href = preference.init_point;
+            }
+        } catch (error) {
+            console.error('Error al crear la preferencia de pago:', error);
+            alert('No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo.');
+        }
     };
 
     const formatPrice = (price) => {

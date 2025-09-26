@@ -45,3 +45,6 @@ export const getAdminKpis = () => axiosClient.get('/admin/metrics/kpis').then(re
 
 // Chatbot
 export const postChatQuery = (payload) => axiosClient.post('/chatbot/query', payload).then(res => res.data);
+
+// Checkout
+export const createMercadoPagoPreference = (cart) => axiosClient.post('/checkout/create_preference', cart).then(res => res.data);
