@@ -2,19 +2,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { useNotify } from '@/context/NotificationContext'; // <-- ¡PASO 1: Importamos el hook para notificar!
 
-// Centralizamos el cliente de axios aquí por ahora
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
 });
 
-// --- Lógica para obtener el carrito ---
+// --- Lógica para obtener el carrito (sin cambios) ---
 const fetchCart = async () => {
   const token = localStorage.getItem('authToken');
   let guestId = localStorage.getItem('guestSessionId');
   if (!guestId && !token) {
-    // Si no hay sesión de invitado ni de usuario, no hay nada que buscar.
-    // Devolvemos un carrito vacío por defecto para evitar un error 404.
     return { items: [], user_id: null, guest_session_id: null };
   }
 
@@ -30,16 +28,15 @@ const fetchCart = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching cart:", error);
-    // En caso de error (ej: carrito no encontrado), devolvemos uno vacío
     return { items: [], user_id: null, guest_session_id: null };
   }
 };
 
-// --- Lógica para añadir un item ---
+// --- Lógica para añadir un item (sin cambios) ---
 const addItemApi = async (item) => {
   const token = localStorage.getItem('authToken');
   let guestId = localStorage.getItem('guestSessionId');
-  if (!guestId && !token) { // Si no hay sesión, creamos una de invitado
+  if (!guestId && !token) {
       guestId = uuidv4();
       localStorage.setItem('guestSessionId', guestId);
   }
@@ -53,7 +50,7 @@ const addItemApi = async (item) => {
   return data;
 };
 
-// --- Lógica para eliminar un item ---
+// --- Lógica para eliminar un item (sin cambios) ---
 const removeItemApi = async (variante_id) => {
   const token = localStorage.getItem('authToken');
   const guestId = localStorage.getItem('guestSessionId');
@@ -70,32 +67,37 @@ const removeItemApi = async (variante_id) => {
 };
 
 
-// --- El Hook Campeón ---
+// --- El Hook Campeón (AHORA CON NOTIFICACIONES) ---
 export const useCart = () => {
   const queryClient = useQueryClient();
+  const { notify } = useNotify(); // <-- ¡PASO 2: Traemos la función para notificar!
 
-  // Query para obtener los datos del carrito
   const { data: cart, isLoading, error } = useQuery({
     queryKey: ['cart'],
     queryFn: fetchCart,
   });
 
-  // Mutación para añadir un item
   const { mutate: addItem, isPending: isAddingItem } = useMutation({
     mutationFn: addItemApi,
     onSuccess: (updatedCart) => {
-      // Cuando la mutación es exitosa, invalidamos la query 'cart'
-      // para que React Query la vuelva a obtener con los datos actualizados.
       queryClient.setQueryData(['cart'], updatedCart);
+      // No necesitamos un toast acá porque ya lo muestra el modal de "Item Added"
     },
+    onError: () => {
+        notify('Error al agregar el producto', 'error');
+    }
   });
 
-  // Mutación para eliminar un item
   const { mutate: removeItem, isPending: isRemovingItem } = useMutation({
     mutationFn: removeItemApi,
     onSuccess: (updatedCart) => {
       queryClient.setQueryData(['cart'], updatedCart);
+      // --- ¡PASO 3: LA MAGIA! Llamamos al toast cuando se borra algo ---
+      notify('Producto eliminado del carrito', 'success');
     },
+    onError: () => {
+        notify('Error al eliminar el producto', 'error');
+    }
   });
 
   return {

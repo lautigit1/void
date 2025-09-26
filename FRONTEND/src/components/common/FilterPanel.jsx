@@ -1,4 +1,5 @@
-import React, { useState } from 'react'; // <-- ¡AQUÍ ESTABA EL ERROR!
+// En FRONTEND/src/components/common/FilterPanel.jsx
+import React, { useState } from 'react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
@@ -77,7 +78,7 @@ const FilterPanel = ({ isOpen, onClose }) => {
               max={maxPrice}
               step={1000}
               defaultValue={priceRange}
-              onAfterChange={setPriceRange}
+              onChangeComplete={setPriceRange} /* ¡ARREGLADO! */
               trackStyle={[{ backgroundColor: 'black', height: 2 }]}
               handleStyle={[{ backgroundColor: 'black', borderColor: 'black', height: 10, width: 10, marginTop: -4, boxShadow: 'none' }, { backgroundColor: 'black', borderColor: 'black', height: 10, width: 10, marginTop: -4, boxShadow: 'none'}]}
               railStyle={{ backgroundColor: '#ccc', height: 2 }}

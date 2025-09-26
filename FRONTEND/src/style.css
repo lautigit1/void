@@ -3,12 +3,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- Reseteo a Prueba de Balas y Estilos Base --- */
-html, body, #root {
+/* --- Reseteo y Layout (VERSIÓN FINAL ANTI-BUG) --- */
+html {
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
+  min-height: 100%; /* El body debe poder crecer */
+  display: flex;     /* Lo hacemos flexible para que #root funcione bien */
+  flex-direction: column;
+}
+
+#root {
+  flex-grow: 1;      /* Le decimos a React que ocupe todo el espacio vertical */
+  display: flex;
+  flex-direction: column;
 }
 
 :root {
@@ -34,6 +45,8 @@ body {
     line-height: 1.6;
     position: relative;
 }
+
+/* ... el resto de tu style.css sigue igual ... */
 
 body.menu-open {
     overflow: hidden;
@@ -72,15 +85,16 @@ a {
     cursor: pointer;
 }
 
-/* --- Layout Principal de la Página --- */
+/* --- Layout Principal de la Página (VERSIÓN ANTI-SCROLL BUG) --- */
 .page-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100vh; /* Ocupa como mínimo toda la pantalla */
 }
 
 main {
-  flex-grow: 1;
+  flex-grow: 1; /* Permite que el contenido principal crezca todo lo necesario */
+  width: 100%;
 }
 
 /* --- Header y Navegación Principal --- */
@@ -3316,4 +3330,391 @@ main {
 .quick-view-link-button:hover {
     background-color: #000;
     color: #fff;
+}
+/* --- ESTILOS PARA EL PANEL DE GESTIÓN (VERSIÓN VOID) --- */
+.admin-dashboard-container {
+  display: flex;
+  min-height: calc(100vh - 160px); /* Ajusta para que no se superponga con header/footer */
+  font-family: var(--font-nav);
+  background-color: #f9f9f9;
+}
+
+.admin-sidebar {
+  flex: 0 0 240px;
+  background-color: #000000; /* Sidebar negra, como debe ser */
+  color: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar nav a {
+  display: block;
+  padding: 0.75rem 0;
+  color: #a0a0a0; /* Links en gris sutil */
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active { /* Para que se marque la página activa */
+  color: #fff;
+}
+
+/* El botón de Logout ahora matchea tu estilo */
+.admin-sidebar .admin-upload-button {
+    background: none;
+    border: 1px solid #a0a0a0;
+    color: #a0a0a0;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: auto; /* Lo empuja para abajo */
+    transition: all 0.2s ease;
+}
+
+.admin-sidebar .admin-upload-button:hover {
+    background-color: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.admin-content {
+  flex-grow: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto; /* Para que scrollee si hay mucho contenido */
+}
+
+.admin-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.dashboard-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.widget {
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid #eee; /* Borde sutil en vez de sombra */
+}
+
+.widget h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.widget-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Botón principal (ej: "Añadir Producto") */
+.add-product-btn {
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.add-product-btn:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+/* Tablas */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border: 1px solid #eee;
+}
+
+.admin-table th, .admin-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table thead {
+  background-color: #f9f9f9;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+/* Botones de acción dentro de las tablas */
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background-color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.action-btn.edit:hover {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.action-btn.delete:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+/* Gráficos */
+.dashboard-charts-section {
+  margin-top: 3rem;
+}
+
+.chart-widget {
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid #eee;
+}
+
+.chart-widget h3 {
+  margin-bottom: 1rem;
+}
+/* --- Estilos para el Spinner de Carga --- */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #000; /* Color negro, como tu marca */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* --- Estilos para las Notificaciones (Toast) --- */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translate(-50%, 200%); /* Empieza abajo, fuera de la pantalla */
+    padding: 1rem 1.5rem;
+    background-color: #333; /* Color base oscuro */
+    color: white;
+    font-family: var(--font-nav);
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 9999;
+    transition: transform 0.4s ease-in-out;
+}
+
+.toast.show {
+    transform: translate(-50%, 0); /* Sube a su posición */
+}
+
+.toast.success {
+    background-color: #28a745; /* Verde para éxito */
+}
+
+.toast.error {
+    background-color: #dc3545; /* Rojo para error */
+}
+/* --- Estilos para Páginas de Estado de Pago --- */
+.payment-status-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 70vh;
+  padding: 2rem;
+}
+.status-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  border: 3px solid;
+}
+.status-icon.success { border-color: #28a745; color: #28a745; }
+.status-icon.failure { border-color: #dc3545; color: #dc3545; }
+.status-icon.pending { border-color: #ffc107; color: #ffc107; }
+.payment-status-page h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+.payment-status-page p { max-width: 400px; margin-bottom: 2rem; color: #555; }
+.payment-status-page .form-button { width: auto; padding: 1rem 2rem; }
+/* --- Estilos para el Footer Mejorado --- */
+.main-footer {
+    background-color: var(--footer-bg);
+    color: var(--text-color-inverse);
+    padding: 4rem 3rem 2rem;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #444; /* Línea divisoria sutil */
+    padding-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-column h4 {
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 1rem;
+    font-family: var(--font-nav); /* Usamos tu fuente de navegación */
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-column ul li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-column ul a {
+    color: #aaa; /* Un gris para que no compita */
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
+}
+
+.footer-column ul a:hover {
+    color: #fff;
+}
+
+.subscribe-column p {
+    color: #aaa;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.subscribe-form {
+    display: flex;
+    border-bottom: 1px solid #888;
+}
+
+.subscribe-form input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 0.5rem 0;
+    font-family: var(--font-nav);
+    font-size: 0.9rem;
+}
+
+.subscribe-form input::placeholder {
+    color: #888;
+}
+
+.subscribe-form input:focus {
+    outline: none;
+}
+
+.subscribe-form button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.footer-social-links {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+/* --- Estilos para el Header del Dropdown Menu --- */
+.dropdown-header {
+    display: flex;
+    justify-content: space-between; /* Para que el logo y la X se vayan a las puntas */
+    align-items: center;
+    padding: 1.5rem 2rem;
+    flex-shrink: 0;
+}
+
+.dropdown-logo {
+    font-family: var(--font-logo);
+    font-size: 60px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text-color); /* Color negro, para que se vea en el fondo blanco */
+    line-height: 1;
 }

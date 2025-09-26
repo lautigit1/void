@@ -1,36 +1,13 @@
 // En FRONTEND/src/pages/CartPage.jsx
 import React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const fetchCart = async () => {
-    try {
-        const token = localStorage.getItem('authToken');
-        const guestId = localStorage.getItem('guestSessionId');
-        
-        const headers = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        } else if (guestId) {
-            headers['X-Guest-Session-ID'] = guestId;
-        }
-
-        const { data } = await axios.get('http://localhost:8000/api/cart/', { headers });
-        return data;
-    } catch (error) {
-        console.error("Error fetching cart:", error);
-        throw error;
-    }
-};
+// ¡CAMBIO CLAVE #1: Importamos el hook que tiene toda la magia!
+import { useCart } from '@/hooks/useCart';
 
 const CartPage = () => {
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { data: cart, isLoading, error } = useQuery({
-        queryKey: ['cart'],
-        queryFn: fetchCart,
-    });
+    // ¡CAMBIO CLAVE #2: Usamos el hook para traer el carrito Y la función de borrar!
+    const { cart, isLoading, error, removeItem, isRemovingItem } = useCart();
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
@@ -41,23 +18,10 @@ const CartPage = () => {
         }).format(price).replace("ARS", "$").trim();
     };
 
-    const handleRemoveItem = async (variante_id) => {
-        const token = localStorage.getItem('authToken');
-        const guestId = localStorage.getItem('guestSessionId');
-        
-        const headers = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        } else if (guestId) {
-            headers['X-Guest-Session-ID'] = guestId;
-        }
-
-        try {
-            await axios.delete(`http://localhost:8000/api/cart/items/${variante_id}`, { headers });
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-        } catch (error) {
-            console.error("Error removing item:", error);
-        }
+    // ¡CAMBIO CLAVE #3: La función ahora es mucho más simple!
+    // Simplemente llama a la función removeItem del hook.
+    const handleRemoveItem = (variante_id) => {
+        removeItem(variante_id);
     };
 
     if (isLoading) return <main className="cart-page-container"><p>Cargando carrito...</p></main>;
@@ -101,7 +65,13 @@ const CartPage = () => {
                                     </div>
                                     <div className="item-info-right">
                                         <span className="item-price">{formatPrice(item.price * item.quantity)} ARS</span>
-                                        <button onClick={() => handleRemoveItem(item.variante_id)} className="item-remove-btn">REMOVE</button>
+                                        <button 
+                                            onClick={() => handleRemoveItem(item.variante_id)} 
+                                            className="item-remove-btn"
+                                            disabled={isRemovingItem} // Deshabilitamos el botón mientras borra
+                                        >
+                                            REMOVE
+                                        </button>
                                     </div>
                                 </div>
                             ))}

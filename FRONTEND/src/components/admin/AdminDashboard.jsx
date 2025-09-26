@@ -1,77 +1,66 @@
+// En FRONTEND/src/components/admin/AdminDashboard.jsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useQuery } from '@tanstack/react-query';
+// ¡Importamos TODAS las funciones que necesitamos!
+import { getAdminKpis, getAdminSalesChart } from '@/services/api'; 
+import AdminCharts from './AdminCharts';
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
+  // Pedimos los KPIs
+  const { data: kpis, isLoading: isLoadingKpis, error: errorKpis } = useQuery({
+    queryKey: ['adminKpis'],
+    queryFn: getAdminKpis,
+  });
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  // Pedimos los datos para el gráfico
+  const { data: salesChartData, isLoading: isLoadingCharts, error: errorCharts } = useQuery({
+    queryKey: ['adminSalesChart'],
+    queryFn: getAdminSalesChart,
+  });
+
+  // Mostramos "cargando" si CUALQUIERA de las dos llamadas está en proceso
+  if (isLoadingKpis || isLoadingCharts) {
+    return <p>Cargando telemetría...</p>;
+  }
+
+  // Si CUALQUIERA de las dos llamadas falló, mostramos un error
+  if (errorKpis || errorCharts) {
+    return <p className="error-message">Error al cargar las métricas: {errorKpis?.message || errorCharts?.message}</p>;
+  }
 
   return (
     <div>
-      <div className="admin-header">
-        <h1>MANAGEMENT PANEL</h1>
-        <button onClick={handleLogout} className="admin-upload-button" style={{ marginTop: '2rem' }}>
-          LOGOUT
-        </button>
-      </div>
-      <div className="admin-forms-wrapper">
-        
-        {/* New Sale Form */}
-        <div className="admin-form-card">
-          <h2>NEW SALE</h2>
-          <div className="admin-form-group">
-            <label htmlFor="sale-date">DATE</label>
-            <input type="date" id="sale-date" />
-          </div>
-          <div className="admin-form-group">
-            <label htmlFor="customer-name">CUSTOMER NAME</label>
-            <input type="text" id="customer-name" />
-          </div>
-          <div className="admin-form-group">
-            <label htmlFor="products-sold">PRODUCTS SOLD</label>
-            <input type="text" id="products-sold" />
-          </div>
-          <div className="admin-form-group">
-            <label htmlFor="amount-sale">AMOUNT</label>
-            <input type="number" id="amount-sale" />
-          </div>
-          <div className="admin-form-group">
-            <label htmlFor="payment-method-sale">PAYMENT METHOD</label>
-            <input type="text" id="payment-method-sale" />
-          </div>
-          <button className="admin-upload-button">UPLOAD</button>
-        </div>
+      <h1>Dashboard de Telemetría</h1>
+      <p>Desde acá vas a poder controlar toda la magia de VOID.</p>
 
-        {/* New Expense Form */}
-        <div className="admin-form-card">
-          <h2>NEW EXPENSE</h2>
-          <div className="admin-form-group">
-            <label htmlFor="expense-date">DATE</label>
-            <input type="date" id="expense-date" />
+      {kpis && (
+        <div className="dashboard-widgets">
+          <div className="widget">
+            <h3>Ingresos Totales</h3>
+            <p className="widget-value">${kpis.total_revenue.toLocaleString('es-AR')}</p>
           </div>
-          <div className="admin-form-group">
-            <label htmlFor="supplier-name">SUPPLIER NAME</label>
-            <input type="text" id="supplier-name" />
+          <div className="widget">
+            <h3>Ticket Promedio</h3>
+            <p className="widget-value">${kpis.average_ticket.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
-          <div className="admin-form-group">
-            <label htmlFor="description-expense">DESCRIPTION</label>
-            <input type="text" id="description-expense" />
+          <div className="widget">
+            <h3>Órdenes Totales</h3>
+            <p className="widget-value">{kpis.total_orders}</p>
           </div>
-          <div className="admin-form-group">
-            <label htmlFor="amount-expense">AMOUNT</label>
-            <input type="number" id="amount-expense" />
+          <div className="widget">
+            <h3>Usuarios Registrados</h3>
+            <p className="widget-value">{kpis.total_users}</p>
           </div>
-          <div className="admin-form-group">
-            <label htmlFor="payment-method-expense">PAYMENT METHOD</label>
-            <input type="text" id="payment-method-expense" />
+          <div className="widget">
+            <h3>Gastos Totales</h3>
+            <p className="widget-value">${kpis.total_expenses.toLocaleString('es-AR')}</p>
           </div>
-          <button className="admin-upload-button">UPLOAD</button>
         </div>
+      )}
+      
+      <div className="dashboard-charts-section">
+        {/* Le pasamos la data del gráfico como un "prop" */}
+        <AdminCharts salesChartData={salesChartData} />
       </div>
     </div>
   );

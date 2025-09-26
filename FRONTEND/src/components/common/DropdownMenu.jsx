@@ -1,25 +1,30 @@
+// En FRONTEND/src/components/common/DropdownMenu.jsx
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // 1. IMPORTAMOS Link
+import { Link } from 'react-router-dom';
 
 const DropdownMenu = ({ isOpen, onClose, logoPosition }) => {
   const [activeCategory, setActiveCategory] = useState('menswear');
 
-  const handleCategoryClick = (e, category) => {
-    // Ya no prevenimos la navegación, solo cambiamos la categoría activa
-    setActiveCategory(category);
+  const handleLinkClick = () => {
+    onClose();
   };
-  
+
+  // Estilo para el logo "fantasma" que se posiciona
   const logoStyle = {
     position: 'fixed',
     top: `${logoPosition.top}px`,
     left: `${logoPosition.left}px`,
     width: `${logoPosition.width}px`,
     height: `${logoPosition.height}px`,
+    color: '#000', // El logo en negro sobre el menú blanco
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: isOpen ? 1 : 0,
+    zIndex: 2003, // Por encima del menú pero debajo del botón de cerrar
+    opacity: isOpen ? 1 : 0, // Aparece y desaparece con el menú
     transition: 'opacity 0.2s ease-in-out',
+    pointerEvents: 'none', // Para que no se pueda clickear
   };
 
   return (
@@ -27,7 +32,7 @@ const DropdownMenu = ({ isOpen, onClose, logoPosition }) => {
       <div 
         className={`overlay ${isOpen ? 'active' : ''}`} 
         onClick={onClose}
-      ></div>
+      />
       
       <aside className={`dropdown-menu ${isOpen ? 'open' : ''}`}>
         <div className="dropdown-header">
@@ -40,30 +45,22 @@ const DropdownMenu = ({ isOpen, onClose, logoPosition }) => {
             <span></span>
             <span></span>
           </button>
-          
-          <div className="dropdown-logo" style={logoStyle}>VOID</div>
         </div>
         
+        {/* ¡EL LOGO FANTASMA! Se posiciona solo con la data de App.jsx */}
+        <div className="logo" style={logoStyle}>VOID</div>
+
         <div className="dropdown-content">
           <div className="menu-categories">
             <nav className="dropdown-nav-left">
               <ul>
-                {/* 2. CAMBIAMOS <a> POR <Link> y añadimos onClick={onClose} */}
                 <li>
-                  <Link 
-                    to="/catalog/womenswear"
-                    className={`category-link ${activeCategory === 'womenswear' ? 'active-category' : ''}`} 
-                    onClick={(e) => { handleCategoryClick(e, 'womenswear'); onClose(); }}
-                  >
+                  <Link to="/catalog/womenswear" onClick={handleLinkClick} className={`category-link ${activeCategory === 'womenswear' ? 'active-category' : ''}`}>
                     WOMENSWEAR
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/catalog/menswear"
-                    className={`category-link ${activeCategory === 'menswear' ? 'active-category' : ''}`} 
-                    onClick={(e) => { handleCategoryClick(e, 'menswear'); onClose(); }}
-                  >
+                  <Link to="/catalog/menswear" onClick={handleLinkClick} className={`category-link ${activeCategory === 'menswear' ? 'active-category' : ''}`}>
                     MENSWEAR
                   </Link>
                 </li>
@@ -71,27 +68,22 @@ const DropdownMenu = ({ isOpen, onClose, logoPosition }) => {
             </nav>
             <nav className="dropdown-nav-right">
               <ul className={`submenu ${activeCategory === 'womenswear' ? 'active-submenu' : ''}`}>
-                <li><Link to="/catalog/dresses" onClick={onClose}>DRESSES</Link></li>
-                <li><Link to="/catalog/tops" onClick={onClose}>TOPS</Link></li>
-                <li><Link to="/catalog/skirts" onClick={onClose}>SKIRTS</Link></li>
+                <li><Link to="/catalog/dresses" onClick={handleLinkClick}>DRESSES</Link></li>
+                <li><Link to="/catalog/tops" onClick={handleLinkClick}>TOPS</Link></li>
               </ul>
               <ul className={`submenu ${activeCategory === 'menswear' ? 'active-submenu' : ''}`}>
-                <li><Link to="/catalog/hoodies" onClick={onClose}>HOODIES</Link></li>
-                <li><Link to="/catalog/jackets" onClick={onClose}>JACKETS</Link></li>
-                <li><Link to="/catalog/shirts" onClick={onClose}>SHIRTS</Link></li>
-                <li><Link to="/catalog/pants" onClick={onClose}>PANTS</Link></li>
+                <li><Link to="/catalog/hoodies" onClick={handleLinkClick}>HOODIES</Link></li>
+                <li><Link to="/catalog/jackets" onClick={handleLinkClick}>JACKETS</Link></li>
+                <li><Link to="/catalog/shirts" onClick={handleLinkClick}>SHIRTS</Link></li>
+                <li><Link to="/catalog/pants" onClick={handleLinkClick}>PANTS</Link></li>
               </ul>
             </nav>
           </div>
 
           <div className="dropdown-footer">
             <div className="footer-images">
-              <div className="footer-image left">
-                <img src="/img/dropdownIzquierda.jpg" alt="Carretera" />
-              </div>
-              <div className="footer-image right">
-                <img src="/img/dropdownDerecha.jpg" alt="Autopista" />
-              </div>
+              <div className="footer-image left"><img src="/img/dropdownIzquierda.jpg" alt="Carretera" /></div>
+              <div className="footer-image right"><img src="/img/dropdownDerecha.jpg" alt="Autopista" /></div>
             </div>
             <h3 className="footer-text">FIND YOUR OWN ROAD</h3>
           </div>

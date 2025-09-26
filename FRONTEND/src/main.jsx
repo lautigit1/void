@@ -1,17 +1,19 @@
+// En FRONTEND/src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
 import './style.css';
+import { NotificationProvider } from './context/NotificationContext.jsx'; // <-- IMPORTAR
 
-// Crear una instancia del cliente de React Query
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* Envolver la App completa con el Provider */}
     <QueryClientProvider client={queryClient}>
-      <App />
+      <NotificationProvider> {/* <-- ENVOLVER LA APP */}
+        <App />
+      </NotificationProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
