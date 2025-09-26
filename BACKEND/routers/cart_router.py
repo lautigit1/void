@@ -17,9 +17,6 @@ router = APIRouter(
 # --- Helper para obtener el ID del que hace el pedido ---
 def get_session_identifier(current_user: Optional[dict], guest_id: Optional[str]):
     if current_user:
-        # --- FIX ---
-        # El 'current_user' es el documento de la DB,
-        # por lo tanto, usamos '_id'
         return {"user_id": str(current_user["_id"])} 
     
     if guest_id:
@@ -32,7 +29,7 @@ def get_session_identifier(current_user: Optional[dict], guest_id: Optional[str]
 def get_guest_session():
     return {"guest_session_id": str(uuid.uuid4())}
 
-# --- Endpoints del Carrito ---
+# --- Endpoints del Carrito (AHORA CON EL FIX DIRECTO) ---
 
 @router.get("/", response_model=cart_schemas.Cart, summary="Obtener el carrito actual")
 async def get_cart(
@@ -41,16 +38,19 @@ async def get_cart(
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
     identifier = get_session_identifier(current_user, guest_session_id)
-    cart = await db.carts.find_one(identifier)
+    cart_doc = await db.carts.find_one(identifier)
     
-    if not cart:
+    if not cart_doc:
         new_cart_data = identifier.copy()
         new_cart_data.update({"items": [], "last_updated": datetime.now()})
         return cart_schemas.Cart(**new_cart_data)
         
-    # --- FIX ---
-    # Si encontramos el 'cart', devolvemos 'cart', no 'new_cart_data'.
-    return cart_schemas.Cart(**cart)
+    # --- ¡ARREGLO A LO BRUTO! ---
+    # Convertimos el ObjectId a string a mano, sin pedirle permiso a nadie.
+    if "_id" in cart_doc:
+        cart_doc["_id"] = str(cart_doc["_id"])
+    
+    return cart_schemas.Cart(**cart_doc)
 
 @router.post("/items", response_model=cart_schemas.Cart, summary="Añadir un item al carrito")
 async def add_item_to_cart(
@@ -61,7 +61,6 @@ async def add_item_to_cart(
 ):
     identifier = get_session_identifier(current_user, guest_session_id)
     
-    # (Fix de 'variante_id' ya aplicado)
     result = await db.carts.update_one(
         {**identifier, "items.variante_id": item.variante_id},
         {"$inc": {"items.$.quantity": item.quantity}}
@@ -77,12 +76,16 @@ async def add_item_to_cart(
             upsert=True
         )
         
-    updated_cart = await db.carts.find_one(identifier)
-    if not updated_cart:
+    updated_cart_doc = await db.carts.find_one(identifier)
+    if not updated_cart_doc:
          raise HTTPException(status_code=404, detail="No se pudo encontrar o crear el carrito.")
-    return cart_schemas.Cart(**updated_cart)
 
-# (Fix de 'variante_id' ya aplicado)
+    # --- ¡ARREGLO A LO BRUTO TAMBIÉN ACÁ! ---
+    if "_id" in updated_cart_doc:
+        updated_cart_doc["_id"] = str(updated_cart_doc["_id"])
+
+    return cart_schemas.Cart(**updated_cart_doc)
+
 @router.delete("/items/{variante_id}", response_model=cart_schemas.Cart, summary="Eliminar un item del carrito")
 async def remove_item_from_cart(
     variante_id: int, 
@@ -102,10 +105,14 @@ async def remove_item_from_cart(
         if not cart:
             raise HTTPException(status_code=404, detail="Carrito no encontrado.")
     
-    updated_cart = await db.carts.find_one(identifier)
-    if not updated_cart:
+    updated_cart_doc = await db.carts.find_one(identifier)
+    if not updated_cart_doc:
         new_cart_data = identifier.copy()
         new_cart_data.update({"items": [], "last_updated": datetime.now()})
         return cart_schemas.Cart(**new_cart_data)
 
-    return cart_schemas.Cart(**updated_cart)
+    # --- ¡Y ARREGLO A LO BRUTO POR TERCERA VEZ PARA QUE APRENDA! ---
+    if "_id" in updated_cart_doc:
+        updated_cart_doc["_id"] = str(updated_cart_doc["_id"])
+
+    return cart_schemas.Cart(**updated_cart_doc)

@@ -1,115 +1,155 @@
 // En FRONTEND/src/pages/AdminProductFormPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axiosClient from '@/services/api';
-
-const fetchProduct = async (productId) => {
-  if (!productId) return null;
-  const { data } = await axiosClient.get(`/products/${productId}`);
-  return data;
-};
-
-const createOrUpdateProduct = async ({ productId, formData }) => {
-  const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-  if (productId) {
-    const { data } = await axiosClient.put(`/admin/products/${productId}`, formData, config);
-    return data;
-  } else {
-    const { data } = await axiosClient.post('/admin/products', formData, config);
-    return data;
-  }
-};
+import { AuthContext } from '../context/AuthContext';
+import { NotificationContext } from '../context/NotificationContext';
+import Spinner from '../components/common/Spinner';
 
 const AdminProductFormPage = () => {
-  const { productId } = useParams();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const isEditing = Boolean(productId);
+    const { productId } = useParams();
+    const navigate = useNavigate();
+    const { token } = useContext(AuthContext);
+    const { notify } = useContext(NotificationContext);
 
-  const [formData, setFormData] = useState({
-    nombre: '',
-    descripcion: '',
-    precio: '',
-    sku: '',
-    stock: '',
-    categoria_id: 1,
-  });
-  const [imageFile, setImageFile] = useState(null);
+    const [productData, setProductData] = useState({
+        nombre: '',
+        descripcion: '',
+        precio: 0,
+        sku: '',
+        stock: 0,
+        categoria_id: 1,
+        material: '',
+        talle: '',
+        color: '',
+    });
+    const [imageFiles, setImageFiles] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const isEditing = Boolean(productId);
 
-  const { data: product, isLoading } = useQuery({
-    queryKey: ['product', productId],
-    queryFn: () => fetchProduct(productId),
-    enabled: isEditing,
-  });
+    useEffect(() => {
+        if (isEditing) {
+            setLoading(true);
+            const fetchProduct = async () => {
+                try {
+                    const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}`);
+                    if (!response.ok) throw new Error('No se pudo cargar el producto.');
+                    const data = await response.json();
+                    setProductData({
+                        nombre: data.nombre || '',
+                        descripcion: data.descripcion || '',
+                        precio: data.precio || 0,
+                        sku: data.sku || '',
+                        stock: data.stock || 0,
+                        categoria_id: data.categoria_id || 1,
+                        material: data.material || '',
+                        talle: data.talle || '',
+                        color: data.color || '',
+                    });
+                    setExistingImages(data.urls_imagenes || []);
+                } catch (err) {
+                    notify(err.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchProduct();
+        }
+    }, [productId, isEditing, notify]);
 
-  useEffect(() => {
-    if (product) {
-      setFormData({
-        nombre: product.nombre || '',
-        descripcion: product.descripcion || '',
-        precio: product.precio || '',
-        sku: product.sku || '',
-        stock: product.stock || '',
-        categoria_id: product.categoria_id || 1,
-      });
-    }
-  }, [product]);
-  
-  const mutation = useMutation({
-    mutationFn: createOrUpdateProduct,
-    onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: ['adminProducts']});
-        navigate('/admin/products');
-    },
-    onError: (error) => {
-        alert("Error: " + error.response?.data?.detail);
-    }
-  });
+    const handleChange = (e) => {
+        const { name, value, type } = e.target;
+        setProductData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+    };
 
+    const handleFileChange = (e) => {
+        if (e.target.files.length > 3) {
+            notify('Solo puedes subir hasta 3 imágenes nuevas.', 'error');
+            e.target.value = null;
+            return;
+        }
+        setImageFiles(Array.from(e.target.files));
+    };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
-  const handleFileChange = (e) => {
-    setImageFile(e.target.files[0]);
-  };
+        const formData = new FormData();
+        for (const key in productData) {
+            formData.append(key, productData[key]);
+        }
+        imageFiles.forEach(file => {
+            formData.append('images', file);
+        });
+        
+        if (isEditing) {
+            formData.append('existing_images_json', JSON.stringify(existingImages));
+        }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    if(imageFile) {
-        data.append('file', imageFile);
-    }
+        const url = isEditing ? `http://127.0.0.1:8000/api/products/${productId}` : 'http://127.0.0.1:8000/api/products/';
+        const method = isEditing ? 'PUT' : 'POST';
 
-    for (const key in formData) {
-      data.append(key, formData[key]);
-    }
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData,
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Ocurrió un error.');
+            }
+            notify(`Producto ${isEditing ? 'actualizado' : 'creado'} con éxito!`, 'success');
+            navigate('/admin/products');
+        } catch (err) {
+            notify(err.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (isEditing && loading) return <Spinner message="Cargando producto..." />;
+
+    return (
+        <div>
+          <h1>{isEditing ? 'Editar Producto' : 'Añadir Nuevo Producto'}</h1>
+          <form onSubmit={handleSubmit} className="admin-form">
+            <div className="form-grid">
+              {Object.keys(productData).map(key => (
+                <div className="form-group" key={key}>
+                  <label htmlFor={key}>{key.replace(/_/g, ' ').toUpperCase()}</label>
+                  <input
+                    type={key.includes('precio') || key.includes('stock') || key.includes('id') ? 'number' : 'text'}
+                    id={key}
+                    name={key}
+                    value={productData[key]}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              ))}
+            </div>
     
-    mutation.mutate({ productId, formData: data });
-  };
-
-  if (isLoading) return <p>Cargando producto...</p>;
-
-  return (
-    <div>
-      <h1>{isEditing ? 'Editar Producto' : 'Crear Producto'}</h1>
-      <form onSubmit={handleSubmit}>
-        {/* ...inputs para los datos del producto... */}
-        <input name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Nombre" />
-        <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} placeholder="Descripción" />
-        <input name="precio" type="number" value={formData.precio} onChange={handleChange} placeholder="Precio" />
-        <input name="sku" value={formData.sku} onChange={handleChange} placeholder="SKU" />
-        <input name="stock" type="number" value={formData.stock} onChange={handleChange} placeholder="Stock" />
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando...' : 'Guardar'}
-        </button>
-      </form>
-    </div>
-  );
+            <div className="form-group" style={{gridColumn: '1 / -1', marginTop: '1rem'}}>
+                <label htmlFor="images">AÑADIR IMÁGENES (hasta 3)</label>
+                <input type="file" id="images" name="images" multiple accept="image/*" onChange={handleFileChange} />
+                {isEditing && existingImages.length > 0 && (
+                    <div style={{marginTop: '10px'}}>
+                        <p>Imágenes actuales:</p>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                            {existingImages.map(img => <img key={img} src={img} alt="preview" width="60" style={{border: '1px solid #ddd'}}/>)}
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar Producto'}
+            </button>
+          </form>
+        </div>
+      );
 };
 
 export default AdminProductFormPage;

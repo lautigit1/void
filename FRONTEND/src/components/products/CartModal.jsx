@@ -6,29 +6,80 @@ import { useCart } from '../../hooks/useCart';
 const CartModal = ({ isOpen, onClose }) => {
     const { cart, isLoading, error, removeItem } = useCart();
     
-    if (!isOpen) return null;
-    
-    if (isLoading) return <div className="cart-modal-overlay"><div className="cart-modal-content"><p>Cargando carrito...</p></div></div>;
-    if (error) return <div className="cart-modal-overlay"><div className="cart-modal-content"><p>Error al cargar el carrito.</p></div></div>;
+    // El modal ahora está "consciente" de su estado de apertura
+    // y solo se renderiza si isOpen es true.
+    const overlayClass = isOpen ? "cart-modal-overlay open" : "cart-modal-overlay";
 
-    const subtotal = cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-    const orderTotal = subtotal;
+    // --- MANEJO DE ESTADOS DE CARGA Y ERROR ---
+    const renderContent = () => {
+        if (isLoading) {
+            return <p className="empty-cart-message">Cargando carrito...</p>;
+        }
+        if (error) {
+            return <p className="empty-cart-message">Error al cargar el carrito.</p>;
+        }
+        if (!cart || cart.items.length === 0) {
+            return <p className="empty-cart-message">Tu carrito está vacío.</p>;
+        }
 
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(price).replace("ARS", "$").trim();
-    };
+        const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+        const orderTotal = subtotal;
 
-    const handleRemoveItem = (variante_id) => {
-        removeItem(variante_id);
+        const formatPrice = (price) => {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(price).replace("ARS", "$").trim();
+        };
+
+        return (
+            <>
+                <div className="cart-items-list">
+                    {cart.items.map(item => (
+                        <div className="cart-item" key={item.variante_id}>
+                            <div className="cart-item-image">
+                                <img src={item.image_url || '/img/placeholder.jpg'} alt={item.name} />
+                            </div>
+                            <div className="cart-item-details">
+                                <h3>VOID</h3>
+                                <p>{item.name}</p>
+                                <p>SIZE: {item.size}</p>
+                            </div>
+                            <div className="cart-item-info">
+                                <span className="cart-item-price">{formatPrice(item.price * item.quantity)} ARS</span>
+                                <button onClick={() => removeItem(item.variante_id)} className="cart-item-remove-btn">REMOVE</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="cart-summary-section">
+                    <div className="summary-line">
+                        <span>SUBTOTAL</span>
+                        <span>{formatPrice(subtotal)} ARS</span>
+                    </div>
+                    <div className="summary-line">
+                        <span>SHIPPING ESTIMATE</span>
+                        <span>CALCULATED AT CHECKOUT</span>
+                    </div>
+                    <div className="summary-line total">
+                        <span>ORDER TOTAL</span>
+                        <span>{formatPrice(orderTotal)} ARS</span>
+                    </div>
+                </div>
+                
+                <div className="cart-buttons-section">
+                    <Link to="/cart" className="cart-button-link view-bag" onClick={onClose}>VIEW BAG</Link>
+                    <Link to="/checkout" className="cart-button-link checkout" onClick={onClose}>CHECKOUT</Link>
+                </div>
+            </>
+        );
     };
 
     return (
-        <div className="cart-modal-overlay" onClick={onClose}>
+        <div className={overlayClass} onClick={onClose}>
             <div className="cart-modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="cart-modal-header">
                     <h2>SHOPPING BAG</h2>
@@ -38,49 +89,7 @@ const CartModal = ({ isOpen, onClose }) => {
                         </svg>
                     </button>
                 </div>
-                
-                <div className="cart-items-list">
-                    {cart?.items && cart.items.length > 0 ? (
-                        cart.items.map(item => (
-                            <div className="cart-item" key={item.variante_id}>
-                                <div className="cart-item-image">
-                                    <img src={item.image_url || '/img/placeholder.jpg'} alt={item.name} />
-                                </div>
-                                <div className="cart-item-details">
-                                    <h3>VOID</h3>
-                                    <p>{item.name}</p>
-                                    <p>SIZE: {item.size}</p>
-                                </div>
-                                <div className="cart-item-info">
-                                    <span className="cart-item-price">{formatPrice(item.price * item.quantity)} ARS</span>
-                                    <button onClick={() => handleRemoveItem(item.variante_id)} className="cart-item-remove-btn">REMOVE</button>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="empty-cart-message">Tu carrito está vacío.</p>
-                    )}
-                </div>
-
-                <div className="cart-summary-section">
-                    <div className="summary-line">
-                        <span className="cart-summary-label">SUBTOTAL</span>
-                        <span className="cart-summary-value">{formatPrice(subtotal)} ARS</span>
-                    </div>
-                    <div className="summary-line">
-                        <span className="cart-summary-label">SHIPPING ESTIMATE</span>
-                        <span className="cart-summary-value">CALCULATED AT CHECKOUT</span>
-                    </div>
-                    <div className="summary-line total">
-                        <span className="cart-summary-label">ORDER TOTAL</span>
-                        <span className="cart-summary-value">{formatPrice(orderTotal)} ARS</span>
-                    </div>
-                </div>
-                
-                <div className="cart-buttons-section">
-                    <Link to="/cart" className="cart-button-link view-bag" onClick={onClose}>VIEW BAG</Link>
-                    <Link to="/checkout" className="cart-button-link checkout" onClick={onClose}>CHECKOUT</Link>
-                </div>
+                {renderContent()}
             </div>
         </div>
     );

@@ -1,25 +1,29 @@
 // En FRONTEND/src/components/common/ProtectedRoute.jsx
-import React from 'react';
+
+import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/useAuthStore.js';
+import { AuthContext } from '../../context/AuthContext'; // <-- CAMBIO CLAVE: Importa el nuevo contexto
+import Spinner from './Spinner'; // Importamos el spinner para una mejor experiencia
 
 const ProtectedRoute = ({ children }) => {
-  // --- ¡CAMBIO CLAVE #1: Así se usa el hook para que reaccione a los cambios! ---
-  const { isAuthenticated, user, isAuthLoading } = useAuthStore();
+  // --- LÓGICA CORREGIDA ---
+  // Ahora escucha al AuthContext, igual que el LoginPage y el Navbar
+  const { isAuthenticated, user, loading } = useContext(AuthContext);
 
-  // --- ¡CAMBIO CLAVE #2: Mientras chequea la sesión, mostramos algo o nada! ---
-  if (isAuthLoading) {
-    return <div>Verificando permisos...</div>; // O un spinner fachero
+  // Mientras el AuthContext está verificando el token (al cargar la página),
+  // mostramos un spinner. Esto evita el bucle infinito.
+  if (loading) {
+    return <Spinner message="Verificando permisos..." />;
   }
 
-  // --- ¡CAMBIO CLAVE #3: Ahora sí, esta lógica se ejecuta con la data actualizada! ---
-  if (!isAuthenticated || user?.role !== 'admin') {
-    // Si no es admin o no está logueado, lo mandamos al login.
-    return <Navigate to="/login" replace />;
+  // Cuando termina de cargar, si el usuario está autenticado y es admin,
+  // le damos acceso a la ruta.
+  if (isAuthenticated && user?.role === 'admin') {
+    return children;
   }
 
-  // Si pasó todas las pruebas, es un campeón, que pase.
-  return children;
+  // Si no cumple las condiciones, lo redirigimos al login.
+  return <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

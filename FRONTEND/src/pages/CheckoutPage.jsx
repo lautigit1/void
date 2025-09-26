@@ -1,10 +1,13 @@
 // En FRONTEND/src/pages/CheckoutPage.jsx
-import React, { useState } from 'react';
-import { useCart } from '@/hooks/useCart';
-import { createMercadoPagoPreference } from '@/services/api'; // ¡Importamos la nueva función!
+
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CartContext } from '../context/CartContext';
+import { NotificationContext } from '../context/NotificationContext';
+import Spinner from '../components/common/Spinner';
 
 const CheckoutPage = () => {
-    // Estado para los campos del formulario
+    // Estado para todos los campos del formulario, restaurado
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -12,23 +15,23 @@ const CheckoutPage = () => {
         comments: '',
         city: '',
         postalCode: '',
-        country: '',
+        country: 'Argentina', // Valor por defecto
         state: '',
-        prefix: '+54',
+        prefix: '+54', // Valor por defecto
         phone: ''
     });
 
-    // Estado para el método de envío
-    const [shippingMethod, setShippingMethod] = useState('express'); // 'express' o 'standard'
+    const [shippingMethod, setShippingMethod] = useState('express');
+    const [paymentMethod, setPaymentMethod] = useState('mercadoPago');
+    const [isProcessing, setIsProcessing] = useState(false);
+    
+    // Lógica actualizada con React Context
+    const { cart, loading } = useContext(CartContext);
+    const { notify } = useContext(NotificationContext);
+    const navigate = useNavigate();
 
-    // Estado para el método de pago
-    const [paymentMethod, setPaymentMethod] = useState('credit'); // 'credit' o 'mercadoPago'
-
-    // Usamos el hook del carrito para el resumen del pedido
-    const { cart, isLoading, error } = useCart();
-
-    const subtotal = cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-    const shippingCost = shippingMethod === 'express' ? 8000 : 0; // Ejemplo de costo de envío
+    const subtotal = cart?.items.reduce((sum, item) => sum + item.quantity * item.price, 0) || 0;
+    const shippingCost = shippingMethod === 'express' ? 8000 : 0;
     const total = subtotal + shippingCost;
 
     const handleFormChange = (e) => {
@@ -36,53 +39,62 @@ const CheckoutPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // --- ¡AQUÍ ESTÁ LA LÓGICA MODIFICADA! ---
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
-
-        if (paymentMethod !== 'mercadoPago') {
-            alert('Por favor, selecciona Mercado Pago como método de pago para continuar.');
-            return;
-        }
+        setIsProcessing(true);
 
         if (!cart || cart.items.length === 0) {
-            alert('Tu carrito está vacío.');
+            notify('Tu carrito está vacío.', 'error');
+            setIsProcessing(false);
             return;
         }
 
-        try {
-            // 1. Llamamos al backend para crear la preferencia de pago
-            const preference = await createMercadoPagoPreference(cart);
-            
-            // 2. Si todo sale bien, redirigimos al usuario al checkout de MP
-            if (preference.init_point) {
-                window.location.href = preference.init_point;
+        // Flujo para redirección a Mercado Pago
+        if (paymentMethod === 'mercadoPago') {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/checkout/create_preference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cart)
+                });
+
+                const preference = await response.json();
+                if (!response.ok) {
+                    throw new Error(preference.detail || 'No se pudo iniciar el proceso de pago.');
+                }
+
+                if (preference.init_point) {
+                    window.location.href = preference.init_point;
+                }
+            } catch (error) {
+                console.error('Error al crear la preferencia de pago:', error);
+                notify(error.message, 'error');
+                setIsProcessing(false);
             }
-        } catch (error) {
-            console.error('Error al crear la preferencia de pago:', error);
-            alert('No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo.');
+        }
+
+        // Flujo para pago con tarjeta (actualmente no implementado en el backend de esta versión)
+        if (paymentMethod === 'credit') {
+            notify('El pago directo con tarjeta no está implementado en esta versión.', 'error');
+            setIsProcessing(false);
         }
     };
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            style: 'currency', currency: 'ARS',
+            minimumFractionDigits: 0, maximumFractionDigits: 0,
         }).format(price).replace("ARS", "$").trim();
     };
 
-    if (isLoading) return <div className="checkout-page-container"><p>Cargando carrito...</p></div>;
-    if (error) return <div className="checkout-page-container"><p>Error al cargar el carrito para el checkout.</p></div>;
+    if (loading) return <div className="checkout-page-container"><Spinner message="Cargando..." /></div>;
 
     return (
         <main className="checkout-page-container">
             <h1 className="checkout-title">CHECKOUT</h1>
-
             <div className="checkout-content">
                 <form onSubmit={handlePlaceOrder} className="checkout-form-section">
-                    {/* SHIPPING ADDRESS */}
+                    {/* --- ¡FORMULARIO COMPLETO RESTAURADO! --- */}
                     <h2 className="section-title">SHIPPING ADDRESS</h2>
                     <div className="form-grid">
                         <div className="input-group">
@@ -127,7 +139,6 @@ const CheckoutPage = () => {
                         </div>
                     </div>
 
-                    {/* SHIPPING METHOD */}
                     <h2 className="section-title mt-8">SHIPPING METHOD</h2>
                     <div className="shipping-options">
                         <label className="radio-option">
@@ -141,22 +152,11 @@ const CheckoutPage = () => {
                             <span>{formatPrice(8000)} ARS</span> EXPRESS
                             <p className="description">DELIVERY BETWEEN 2 TO 5 BUSINESS DAY</p>
                         </label>
-                        {/* <label className="radio-option">
-                            <input 
-                                type="radio" 
-                                name="shippingMethod" 
-                                value="standard" 
-                                checked={shippingMethod === 'standard'} 
-                                onChange={() => setShippingMethod('standard')} 
-                            />
-                            <span>{formatPrice(0)} ARS</span> STANDARD
-                            <p className="description">DELIVERY BETWEEN 5 TO 10 BUSINESS DAY</p>
-                        </label> */}
                     </div>
 
-                    {/* PAYMENT METHOD */}
                     <h2 className="section-title mt-8">PAYMENT METHOD</h2>
                     <div className="payment-options">
+                        {/* --- ¡OPCIÓN DE PAGO CON TARJETA RESTAURADA! --- */}
                         <label className="radio-option">
                             <input 
                                 type="radio" 
@@ -178,28 +178,24 @@ const CheckoutPage = () => {
                             <span>PAY WITH MERCADO PAGO</span>
                         </label>
                     </div>
-
                 </form>
 
-                {/* ORDER SUMMARY */}
                 <div className="order-summary-section">
-                    <h2 className="section-title">ORDER SUMARY</h2>
+                    <h2 className="section-title">ORDER SUMMARY</h2>
                     {cart?.items.map(item => (
                         <div className="order-item" key={item.variante_id}>
                             <img src={item.image_url || '/img/placeholder.jpg'} alt={item.name} className="order-item-image" />
                             <div className="order-item-details">
-                                <p className="item-name">VOID ASYMMETRICAL SHELL ANORAK</p>
-                                <p className="item-size">SIZE L</p>
+                                <p className="item-name">{item.name}</p>
+                                <p className="item-size">SIZE {item.size}</p>
                             </div>
                             <span className="item-price">{formatPrice(item.price * item.quantity)} ARS</span>
                         </div>
                     ))}
-
                     <div className="summary-line subtotal">
                         <span>SUBTOTAL</span>
                         <span>{formatPrice(subtotal)} ARS</span>
                     </div>
-                    {/* Línea de Shipping si existiera */}
                     {shippingCost > 0 && (
                         <div className="summary-line shipping">
                             <span>SHIPPING</span>
@@ -210,8 +206,9 @@ const CheckoutPage = () => {
                         <span>TOTAL</span>
                         <span>{formatPrice(total)} ARS</span>
                     </div>
-
-                    <button type="submit" onClick={handlePlaceOrder} className="place-order-button">PLACE ORDER</button>
+                    <button type="submit" onClick={handlePlaceOrder} className="place-order-button" disabled={isProcessing}>
+                        {isProcessing ? 'PROCESANDO...' : 'PLACE ORDER'}
+                    </button>
                 </div>
             </div>
         </main>

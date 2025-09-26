@@ -1,19 +1,23 @@
 // En FRONTEND/src/main.jsx
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
 import './style.css';
-import { NotificationProvider } from './context/NotificationContext.jsx'; // <-- IMPORTAR
-
-const queryClient = new QueryClient();
+import { AuthProvider } from './context/AuthContext.jsx';
+import { CartProvider } from './context/CartContext.jsx';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <NotificationProvider> {/* <-- ENVOLVER LA APP */}
-        <App />
+    <AuthProvider>
+      {/* --- ¡AQUÍ ESTÁ LA CORRECCIÓN! --- */}
+      {/* NotificationProvider debe envolver a CartProvider */}
+      <NotificationProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
       </NotificationProvider>
-    </QueryClientProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

@@ -1,9 +1,11 @@
 // En FRONTEND/src/context/NotificationContext.jsx
+
 import React, { createContext, useState, useCallback, useContext } from 'react';
 import Toast from '@/components/common/Toast.jsx';
 
-// Creamos el contexto
-const NotificationContext = createContext(null);
+// --- ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
+// Faltaba la palabra 'export' para que otros archivos pudieran importar el contexto.
+export const NotificationContext = createContext(null);
 
 // Un hook custom para que sea más fácil usarlo
 export const useNotify = () => {
@@ -18,12 +20,10 @@ export const useNotify = () => {
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState({ message: null, type: '' });
 
-  // La función mágica para llamar a la notificación desde cualquier componente
   const notify = useCallback((message, type = 'success') => {
     setNotification({ message, type });
   }, []);
 
-  // Función para limpiar la notificación una vez que desaparece
   const handleDone = () => {
     setNotification({ message: null, type: '' });
   };

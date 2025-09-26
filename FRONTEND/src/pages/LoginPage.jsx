@@ -1,37 +1,44 @@
 // En FRONTEND/src/pages/LoginPage.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/useAuthStore'; // <-- RUTA CORREGIDA CON ALIAS
-import { loginUser } from '@/services/api'; // <-- RUTA CORREGIDA CON ALIAS
+
+import React, { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { NotificationContext } from '../context/NotificationContext'; // <-- Esta importación ahora funcionará
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useContext(AuthContext);
+  const { notify } = useContext(NotificationContext); // <-- Usamos el contexto para notificar
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-
     try {
-      const data = await loginUser(formData);
-      await login(data.access_token);
-      console.log('Login exitoso!');
-      navigate('/');
+      const response = await fetch('http://127.0.0.1:8000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          username: email,
+          password: password,
+        }),
+      });
 
-    } catch (err) {
-      console.error('Error en el login:', err);
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError('Email o contraseña incorrectos. Por favor, intentá de nuevo.');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al iniciar sesión');
       }
+
+      const data = await response.json();
+      login(data.access_token);
+      notify('Inicio de sesión exitoso', 'success'); // Notificación de éxito
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+      notify(err.message, 'error'); // Notificación de error
     }
   };
 
@@ -39,7 +46,7 @@ const LoginPage = () => {
     <main className="login-page-container">
       <div className="login-form-section">
         <h1 className="form-title">LOG IN</h1>
-        <form onSubmit={handleLogin} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <label htmlFor="email">E-MAIL</label>
             <input 
@@ -60,7 +67,7 @@ const LoginPage = () => {
               required
             />
           </div>
-          <a href="#" className="forgot-password-link">FORGOT PASSWORD?</a>
+          <Link to="/forgot-password" className="forgot-password-link">FORGOT PASSWORD?</Link>
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="form-button">LOG IN</button>
         </form>

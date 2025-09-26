@@ -1,14 +1,19 @@
 // En FRONTEND/src/pages/AdminProductVariantsPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProductById, addAdminVariant, deleteAdminVariant } from '@/services/api';
-import { useNotify } from '@/context/NotificationContext';
+import { AuthContext } from '../context/AuthContext';
+import { NotificationContext } from '../context/NotificationContext';
+import Spinner from '../components/common/Spinner';
 
 const AdminProductVariantsPage = () => {
   const { productId } = useParams();
-  const queryClient = useQueryClient();
-  const { notify } = useNotify();
+  const { token } = useContext(AuthContext);
+  const { notify } = useContext(NotificationContext);
+
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const [newVariant, setNewVariant] = useState({
     tamanio: '',
@@ -16,48 +21,86 @@ const AdminProductVariantsPage = () => {
     cantidad_en_stock: 0
   });
 
-  const { data: product, isLoading, isError, error } = useQuery({
-    queryKey: ['productVariants', productId],
-    queryFn: () => getProductById(productId),
-  });
+  useEffect(() => {
+    const fetchProductAndVariants = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}`);
+        if (!response.ok) throw new Error('No se pudo cargar el producto.');
+        const data = await response.json();
+        setProduct(data);
+        setVariants(data.variantes || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProductAndVariants();
+  }, [productId]);
 
-  const addMutation = useMutation({
-    mutationFn: addAdminVariant,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productVariants', productId] });
-      setNewVariant({ tamanio: '', color: '', cantidad_en_stock: 0 });
-      notify('Variante agregada con éxito', 'success');
-    },
-    onError: (err) => notify(`Error: ${err.response?.data?.detail || err.message}`, 'error'),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteAdminVariant,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productVariants', productId] });
-      notify('Variante eliminada', 'success');
-    },
-    onError: (err) => notify(`Error: ${err.response?.data?.detail || err.message}`, 'error'),
-  });
-
-  const handleInputChange = (e) => {
+  const handleNewVariantChange = (e) => {
     const { name, value, type } = e.target;
-    setNewVariant(prev => ({ ...prev, [name]: type === 'number' ? parseInt(value) || 0 : value }));
+    setNewVariant(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseInt(value) || 0 : value
+    }));
   };
 
-  const handleAddSubmit = (e) => {
+  const handleAddVariant = async (e) => {
     e.preventDefault();
-    addMutation.mutate({ productId, variantData: newVariant });
-  };
+    setError('');
 
-  const handleDelete = (variantId) => {
-    if (window.confirm('¿Posta querés borrar esta variante?')) {
-      deleteMutation.mutate(variantId);
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/variants`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newVariant)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'No se pudo crear la variante.');
+      }
+
+      const createdVariant = await response.json();
+      setVariants([...variants, createdVariant]);
+      setNewVariant({ tamanio: '', color: '', cantidad_en_stock: 0 });
+      notify('Variante agregada con éxito.', 'success');
+
+    } catch (err) {
+      setError(err.message);
+      notify(`Error: ${err.message}`, 'error');
     }
   };
 
-  if (isLoading) return <p>Cargando producto...</p>;
-  if (isError) return <p>Error: {error.message}</p>;
+  const handleDeleteVariant = async (variantId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta variante?')) {
+      return;
+    }
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/admin/products/${productId}/variants/${variantId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'No se pudo eliminar la variante.');
+      }
+      setVariants(variants.filter(v => v.id !== variantId));
+      notify('Variante eliminada.', 'success');
+    } catch (err) {
+      setError(err.message);
+      notify(`Error: ${err.message}`, 'error');
+    }
+  };
+
+  if (loading) return <Spinner message="Cargando variantes..." />;
+  if (error) return <h2 className="error-message">Error: {error}</h2>;
 
   return (
     <div>
@@ -65,12 +108,12 @@ const AdminProductVariantsPage = () => {
       <div className="admin-header">
         <h1>Gestionar Variantes de "{product?.nombre}"</h1>
       </div>
-      
+
       <h3>Variantes Actuales</h3>
       <table className="admin-table">
         <thead>
           <tr>
-            <th>ID Variante</th>
+            <th>ID</th>
             <th>Talle</th>
             <th>Color</th>
             <th>Stock</th>
@@ -78,7 +121,7 @@ const AdminProductVariantsPage = () => {
           </tr>
         </thead>
         <tbody>
-          {product?.variantes.map(variant => (
+          {variants.map(variant => (
             <tr key={variant.id}>
               <td>{variant.id}</td>
               <td>{variant.tamanio}</td>
@@ -87,8 +130,7 @@ const AdminProductVariantsPage = () => {
               <td className="actions-cell">
                 <button 
                   className="action-btn delete"
-                  onClick={() => handleDelete(variant.id)}
-                  disabled={deleteMutation.isPending}
+                  onClick={() => handleDeleteVariant(variant.id)}
                 >
                   Eliminar
                 </button>
@@ -98,25 +140,23 @@ const AdminProductVariantsPage = () => {
         </tbody>
       </table>
 
-      <form onSubmit={handleAddSubmit} className="admin-form" style={{marginTop: '2rem'}}>
+      <form onSubmit={handleAddVariant} className="admin-form" style={{marginTop: '2rem'}}>
         <h3>Añadir Nueva Variante</h3>
-        <div className="form-grid" style={{gridTemplateColumns: '1fr 1fr 1fr auto', alignItems: 'flex-end', gap: '1rem'}}>
+        <div className="form-grid">
             <div className="form-group">
                 <label htmlFor="tamanio">Talle</label>
-                <input type="text" id="tamanio" name="tamanio" value={newVariant.tamanio} onChange={handleInputChange} required />
+                <input type="text" id="tamanio" name="tamanio" value={newVariant.tamanio} onChange={handleNewVariantChange} required />
             </div>
             <div className="form-group">
                 <label htmlFor="color">Color</label>
-                <input type="text" id="color" name="color" value={newVariant.color} onChange={handleInputChange} required />
+                <input type="text" id="color" name="color" value={newVariant.color} onChange={handleNewVariantChange} required />
             </div>
             <div className="form-group">
                 <label htmlFor="cantidad_en_stock">Stock</label>
-                <input type="number" id="cantidad_en_stock" name="cantidad_en_stock" value={newVariant.cantidad_en_stock} onChange={handleInputChange} required />
+                <input type="number" id="cantidad_en_stock" name="cantidad_en_stock" value={newVariant.cantidad_en_stock} onChange={handleNewVariantChange} required />
             </div>
-            <button type="submit" className="add-product-btn" style={{marginBottom: 0}} disabled={addMutation.isPending}>
-              {addMutation.isPending ? 'Agregando...' : 'Añadir'}
-            </button>
         </div>
+        <button type="submit" className="submit-btn">Añadir Variante</button>
       </form>
     </div>
   );

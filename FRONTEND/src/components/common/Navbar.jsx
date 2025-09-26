@@ -1,12 +1,12 @@
 // En FRONTEND/src/components/common/Navbar.jsx
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthContext } from '../../context/AuthContext'; // Importamos el AuthContext
 
-// Lo envolvemos en forwardRef para que pueda recibir el 'ref' desde App.jsx
-const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenCart, onOpenSearch }, ref) => {
-    const { isAuthenticated, user } = useAuthStore();
+const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenSearch }, ref) => {
+    // Obtenemos el estado completo de AuthContext, incluyendo 'loading' y 'user'
+    const { isAuthenticated, user, loading } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [isSearching, setIsSearching] = useState(false);
@@ -45,7 +45,6 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenCart, onOpenS
           </div>
 
           <div className="nav-center">
-            {/* Le asignamos el 'ref' que viene desde App.jsx */}
             <Link to="/" className="logo" ref={ref}>VOID</Link>
           </div>
 
@@ -74,17 +73,22 @@ const Navbar = React.forwardRef(({ isMenuOpen, onToggleMenu, onOpenCart, onOpenS
             
             <a>LANGUAGE</a>
 
-            {isAuthenticated ? (
-              <>
-                {user?.role === 'admin' && (
-                  <Link to="/admin">ADMIN</Link>
-                )}
-              </>
-            ) : (
-              <Link to="/login">LOGIN</Link>
+            {/* --- LÓGICA DE RENDERIZADO CORREGIDA Y SIN ERRORES --- */}
+            {/* Solo mostramos los botones de sesión cuando termina de cargar */}
+            {!loading && (
+              isAuthenticated ? (
+                <>
+                  {user?.role === 'admin' && (
+                    <Link to="/admin">ADMIN</Link>
+                  )}
+                  {/* Aquí podrías agregar un enlace a /account o el botón de logout si lo necesitas */}
+                </>
+              ) : (
+                <Link to="/login">LOGIN</Link>
+              )
             )}
-
-            <a onClick={onOpenCart} style={{cursor: 'pointer'}}>BAG</a>
+            
+            <Link to="/cart">BAG</Link>
           </div>
         </nav>
       </header>

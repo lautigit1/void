@@ -1,13 +1,13 @@
 // En FRONTEND/src/pages/CartPage.jsx
-import React from 'react';
+
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// ¡CAMBIO CLAVE #1: Importamos el hook que tiene toda la magia!
-import { useCart } from '@/hooks/useCart';
+import { CartContext } from '../context/CartContext';
+import Spinner from '../components/common/Spinner';
 
 const CartPage = () => {
     const navigate = useNavigate();
-    // ¡CAMBIO CLAVE #2: Usamos el hook para traer el carrito Y la función de borrar!
-    const { cart, isLoading, error, removeItem, isRemovingItem } = useCart();
+    const { cart, loading, removeItemFromCart } = useContext(CartContext);
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('es-AR', {
@@ -18,14 +18,7 @@ const CartPage = () => {
         }).format(price).replace("ARS", "$").trim();
     };
 
-    // ¡CAMBIO CLAVE #3: La función ahora es mucho más simple!
-    // Simplemente llama a la función removeItem del hook.
-    const handleRemoveItem = (variante_id) => {
-        removeItem(variante_id);
-    };
-
-    if (isLoading) return <main className="cart-page-container"><p>Cargando carrito...</p></main>;
-    if (error) return <main className="cart-page-container"><p>Error al cargar el carrito.</p></main>;
+    if (loading) return <main className="cart-page-container"><Spinner message="Cargando carrito..." /></main>;
 
     const subtotal = cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
     const orderTotal = subtotal;
@@ -66,9 +59,8 @@ const CartPage = () => {
                                     <div className="item-info-right">
                                         <span className="item-price">{formatPrice(item.price * item.quantity)} ARS</span>
                                         <button 
-                                            onClick={() => handleRemoveItem(item.variante_id)} 
+                                            onClick={() => removeItemFromCart(item.variante_id)} 
                                             className="item-remove-btn"
-                                            disabled={isRemovingItem} // Deshabilitamos el botón mientras borra
                                         >
                                             REMOVE
                                         </button>
@@ -91,6 +83,7 @@ const CartPage = () => {
                                 <span>{formatPrice(orderTotal)} ARS</span>
                             </div>
                             <div className="checkout-button-container">
+                                {/* --- ¡BOTÓN CORREGIDO! --- */}
                                 <Link to="/checkout" className="checkout-button">CHECKOUT</Link>
                             </div>
                         </div>
